@@ -1,4 +1,4 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Diagnostics

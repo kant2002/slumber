@@ -1,4 +1,4 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open NHamcrest
 
@@ -7,7 +7,7 @@ module Matchers =
 
     let Some'<'a when 'a : equality> (value : 'a) = 
         {
-            new NHamcrest.Matcher<obj> () with
+            new NHamcrest.Core.Matcher<obj> () with
 
                 override this.DescribeMismatch (item, desc) = 
                     desc.AppendText (string item)
@@ -29,7 +29,7 @@ module Matchers =
 
     let None'<'a> =
         {
-            new NHamcrest.Matcher<obj> () with
+            new NHamcrest.Core.Matcher<obj> () with
 
                 override this.DescribeMismatch (item, desc) = 
                     desc.AppendText (string item)

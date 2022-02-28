@@ -1,13 +1,13 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
-open Slumber
-open Slumber.Framework
-open Slumber.Framework.Core.Containers
+open Дрема
+open Дрема.Framework
+open Дрема.Framework.Core.Containers
 
 module Common = 
 
-    let options (meta : OperationMetadata) = 
+    let options (meta : МетаданныеОперации) = 
 
         let endpoint = 
             meta.ContainerUrl
@@ -24,5 +24,5 @@ module Common =
 
         OperationResult.StatusOnly (
             StatusCodes.Ok,
-            [ (Headers.Accept, accept) ]
+            [ (Заголовки.Accept, accept) ]
         )

@@ -1,11 +1,11 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
 open System.Runtime.Serialization
 open System.IO
 open System.Collections.Generic
-open Slumber
-open Slumber.Common.Operations.Metadata
+open Дрема
+open Дрема.Common.Операции.Метаданные
 
 module People = 
 
@@ -54,7 +54,7 @@ module People =
         }
 
     let getPeople (repository : Repository.IRepository) =
-        fun (search : String option) (meta : OperationMetadata) ->
+        fun (search : String option) (meta : МетаданныеОперации) ->
 
             let people = 
                 repository.All ()
@@ -66,7 +66,7 @@ module People =
             }
 
     let getPerson (repository : Repository.IRepository) = 
-        fun (id : Int32) (meta : OperationMetadata) ->
+        fun (id : Int32) (meta : МетаданныеОперации) ->
             try 
                 match (repository.Find id) with
                 | Some person -> OperationResult.ResourceOnly (PersonSummary.BasedOn meta.ContainerUrl person)
@@ -75,10 +75,10 @@ module People =
             | :? FormatException -> OperationResult.StatusOnly 400
 
     let addPerson (repository : Repository.IRepository) = 
-        fun (message : PersonMessage) (meta : OperationMetadata) ->
+        fun (message : PersonMessage) (meta : МетаданныеОперации) ->
         
             let userName = 
-                match meta.User with
+                match meta.Пользователь with
                 | Some user -> user.Id
                 | _ -> String.Empty
 

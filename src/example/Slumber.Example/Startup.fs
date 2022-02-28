@@ -1,4 +1,4 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
 open System.Text.RegularExpressions
@@ -6,9 +6,9 @@ open System.Runtime.Serialization
 
 module Startup = 
 
-    open Slumber    
-    open Slumber.Framework
-    open Slumber.Common.Http
+    open Дрема    
+    open Дрема.Framework
+    open Дрема.Common.Http
 
     [<AutoOpen>]
     module Model = 
@@ -25,7 +25,7 @@ module Startup =
             [<field: DataMember (Name = "services")>] Services : Service seq;
         }
     
-    let getCatalog (meta : OperationMetadata) = 
+    let getCatalog (meta : МетаданныеОперации) = 
 
         let baseUrl = meta.ContainerUrl
         let container = ImplicitConfiguration.get baseUrl
@@ -38,7 +38,7 @@ module Startup =
                     let url = 
                         match endpoint.Template with
                         | "/" -> string baseUrl
-                        | _ -> string (createAbsoluteUri baseUrl endpoint.Template)
+                        | _ -> string (создатьАбсолютныйУри baseUrl endpoint.Template)
 
                     {
                         Name = endpoint.Name;

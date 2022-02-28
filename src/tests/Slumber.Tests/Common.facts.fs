@@ -1,4 +1,4 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open FsUnit
 open Xunit
@@ -7,7 +7,7 @@ open System
 open System.IO
 open System.Web
 open System.Text
-open Slumber
+open Дрема
 
 module ``Common facts`` =
 
@@ -107,7 +107,7 @@ module ``Common facts`` =
                 let payload = 
                     parsePayload request
 
-                payload.Headers |> List.same [ ("Content-Type", MediaTypes.Text.Xml); ("Accept", MediaTypes.Application.Json); ] |> should be True
+                payload.Заголовки |> List.same [ ("Content-Type", MediaTypes.Text.Xml); ("Accept", MediaTypes.Application.Json); ] |> should be True
 
             let [<Fact>] ``Body input stream is copied when not empty`` () =
 
@@ -115,7 +115,7 @@ module ``Common facts`` =
                     parsePayload request
 
                 use reader = 
-                    new StreamReader (Option.get payload.Body)
+                    new StreamReader (Option.get payload.Тело)
 
                 let body = 
                     reader.ReadToEnd ()
@@ -128,7 +128,7 @@ module ``Common facts`` =
                     getRequest String.Empty
                     |> parsePayload
 
-                payload.Body |> should be None'<Stream>                    
+                payload.Тело |> should be None'<Stream>                    
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``parseRequest function`` = 
@@ -136,14 +136,14 @@ module ``Common facts`` =
             let [<Fact>] ``Verb is set correctly`` () =
 
                 let request' = 
-                    parseRequest request Guid.Empty
+                    разобратьЗапрос request Guid.Empty
 
                 request'.Verb |> should equal "POST"
 
             let [<Fact>] ``Request ID is set correctly`` () =
 
                 let id = Guid.NewGuid ()
-                let request' = parseRequest request id
+                let request' = разобратьЗапрос request id
 
                 request'.Id |> should equal id
 
@@ -162,7 +162,7 @@ module ``Common facts`` =
             let ``Returns correct URL`` baseUrl relativeUrl expectedUrl = 
 
                 let baseUrl' = Uri (baseUrl, UriKind.Absolute)
-                let actualUrl = createAbsoluteUri baseUrl' relativeUrl
+                let actualUrl = создатьАбсолютныйУри baseUrl' relativeUrl
 
                 actualUrl.AbsoluteUri |> should equal expectedUrl
 
@@ -181,12 +181,12 @@ module ``Common facts`` =
 
                 let [<Fact>] ``Correct value is returned when header is present`` () =
                     headers
-                    |> Headers.getValue "Content-Type"
+                    |> Заголовки.getValue "Content-Type"
                     |> should be (Some' MediaTypes.Text.Xml)
 
                 let [<Fact>] ``None is returned when header is not present`` () = 
                     headers
-                    |> Headers.getValue "Accept"
+                    |> Заголовки.getValue "Accept"
                     |> should be None'<String>
 
             [<Trait (Traits.Names.Module, ModuleName)>]
@@ -194,17 +194,17 @@ module ``Common facts`` =
 
                 let [<Fact>] ``Correct value is returned when the header is present and non-empty`` () =
                     headers
-                    |> Headers.getNonEmptyValue "Content-Type"
+                    |> Заголовки.получитьНепустоеЗначение "Content-Type"
                     |> should be (Some' MediaTypes.Text.Xml)
 
                 let [<Fact>] ``None is returned when the header is present and empty`` () =
                     headers
-                    |> Headers.getNonEmptyValue "Authorization"
+                    |> Заголовки.получитьНепустоеЗначение "Authorization"
                     |> should be None'<String>
 
                 let [<Fact>] ``None is returned when the header is not present`` () =
                     headers
-                    |> Headers.getNonEmptyValue "Accept"
+                    |> Заголовки.получитьНепустоеЗначение "Accept"
                     |> should be None'<String>
 
         module ``HttpResponseOutput facts`` = 
@@ -244,7 +244,7 @@ module ``Common facts`` =
                     reader.ReadToEnd () = message
 
             [<Trait (Traits.Names.Module, ModuleName)>]
-            module ``WriteBody function`` = 
+            module ``ЗаписатьТело function`` = 
 
                 let [<Fact>] ``Body is written correctly to stream`` () =
                     
@@ -252,19 +252,19 @@ module ``Common facts`` =
                     let message = "Hello, World"
                     let bytes = message |> Encoding.UTF8.GetBytes |> Array.toList
 
-                    wrapped.WriteBody (bytes)
+                    wrapped.ЗаписатьТело (bytes)
                     |> Async.RunSynchronously
 
                     raw |> outputContains message |> should be True                    
 
             [<Trait (Traits.Names.Module, ModuleName)>]
-            module ``WriteHeader function`` = 
+            module ``ЗаписатьЗаголовок function`` = 
 
                 let ``Normal headers are set correctly`` ()  =
                     
                     let raw, wrapped = getOutput ()
 
-                    wrapped.WriteHeader "Custom" "Value"
+                    wrapped.ЗаписатьЗаголовок "Custom" "Value"
                     |> Async.RunSynchronously
 
                     raw.Headers.AllKeys |> Array.exists ((=) "Custom") |> should be True
@@ -274,7 +274,7 @@ module ``Common facts`` =
                     
                     let raw, wrapped = getOutput ()
 
-                    wrapped.WriteHeader Headers.ContentType "text/xml"
+                    wrapped.ЗаписатьЗаголовок Заголовки.ContentType "text/xml"
                     |> Async.RunSynchronously
 
                     raw.Headers.AllKeys.Length |> should equal 0

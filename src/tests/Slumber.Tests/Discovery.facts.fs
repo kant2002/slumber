@@ -1,11 +1,11 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open FsUnit
 open Xunit
 open Xunit.Extensions
 open System
 open System.IO
-open Slumber
+open Дрема
 
 module ``Discovery facts`` =
 
@@ -49,7 +49,7 @@ module ``Discovery facts`` =
             {
                 Request = 
                     {
-                        Request.Empty 
+                        Запрос.Empty 
                         with
                             Url = 
                                 {
@@ -64,7 +64,7 @@ module ``Discovery facts`` =
                                 {
                                     Payload.Empty
                                     with
-                                        Body = (Some (new MemoryStream () :> Stream));
+                                        Тело = (Some (new MemoryStream () :> Stream));
                                 }
                     } ;
                 Container =
@@ -86,7 +86,7 @@ module ``Discovery facts`` =
         let addHeader name value (args : DiscoveryArgs) = 
 
             let payload'  = 
-                { args.Request.Payload with Headers = (name, value) :: args.Request.Payload.Headers; }
+                { args.Request.Payload with Заголовки = (name, value) :: args.Request.Payload.Заголовки; }
 
             { args with Request = { args.Request with Payload = payload'; }; }
 
@@ -279,11 +279,11 @@ module ``Discovery facts`` =
                         {
                             Metadata = 
                                 {
-                                    OperationMetadata.Empty
+                                    МетаданныеОперации.Empty
                                     with
-                                        Request = 
+                                        Запрос = 
                                             {
-                                                Request.Empty
+                                                Запрос.Empty
                                                 with
                                                     Url = 
                                                         {
@@ -480,7 +480,7 @@ module ``Discovery facts`` =
                 let auth _ =
                     Allow (Some { Id = "admin"; Properties = []; })
 
-                let isCorrect (data : UserData option) = 
+                let isCorrect (data : ДанныеПользователя option) = 
                     match data with 
                     | Some user -> user.Id = "admin"
                     | _ -> false

@@ -1,11 +1,11 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open HandyFS.Option
-open Slumber.Common.AsyncAttempt
-open Slumber.Framework
-open Slumber.Framework.Helpers
-open Slumber.Render
+open Дрема.Common.AsyncAttempt
+open Дрема.Framework
+open Дрема.Framework.Helpers
+open Дрема.Render
 
 ///Contains functions used to invoke operations
 module Execution =
@@ -44,19 +44,19 @@ module Execution =
 
     ///Represents the arguments used to run the execution phase
     type ExecutionArgs = {
-        Request : Request;
+        Request : Запрос;
         Container : Container;
         Reader : ReaderInfo option;
         Writer : WriterInfo option;
         Target : TargetInfo;
-        User : UserData option;
+        User : ДанныеПользователя option;
     }
     with
 
         ///Empty execution args
         static member Empty = 
             {
-                Request = Request.Empty;
+                Request = Запрос.Empty;
                 Container = Container.Empty;
                 Reader = None;
                 Writer = None;
@@ -71,7 +71,7 @@ module Execution =
 
                 try 
                     let message = 
-                        match (args.Request.Payload.Body, args.Reader) with
+                        match (args.Request.Payload.Тело, args.Reader) with
                         | (Some _, None) ->
 
                             logWarn "[%A] Request message received but no reader selected" args.Request.Id
@@ -111,9 +111,9 @@ module Execution =
                         {
                             ContainerUrl = args.Container.BaseUrl;
                             EndpointName = args.Target.EndpointName;
-                            Request = args.Request;
-                            Parameters = args.Target.Parameters;
-                            User = args.User;
+                            Запрос = args.Request;
+                            Параметры = args.Target.Parameters;
+                            Пользователь = args.User;
                             Resolver = args.Container.Resolver;
                         };
                     Message = message;

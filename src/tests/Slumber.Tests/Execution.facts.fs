@@ -1,11 +1,11 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open System
 open System.Text
 open System.IO
 open FsUnit
 open Xunit
-open Slumber
+open Дрема
 
 module ``Execution facts`` =
     
@@ -33,7 +33,7 @@ module ``Execution facts`` =
                 Uri ("http://localhost:8080/api", UriKind.Absolute)
 
             {
-                Request.Empty
+                Запрос.Empty
                 with
                     Url = 
                         {
@@ -48,7 +48,7 @@ module ``Execution facts`` =
                         {
                             Payload.Empty
                             with
-                                Body = stream;
+                                Тело = stream;
                         }
             }
 
@@ -195,7 +195,7 @@ module ``Execution facts`` =
             
             let isCorrect result = 
                 match result with
-                | Success context -> context.Metadata.Request.Id = requestId
+                | Success context -> context.Metadata.Запрос.Id = requestId
                 | _ -> false
 
             let setRequestId (args : ExecutionArgs) = 
@@ -215,7 +215,7 @@ module ``Execution facts`` =
             let isCorrect result = 
                 match result with
                 | Success context -> 
-                    match context.Metadata.User with
+                    match context.Metadata.Пользователь with
                     | Some data -> data.Id = "user.name"
                     | _ -> false
                 | _ -> false
@@ -230,7 +230,7 @@ module ``Execution facts`` =
             
             let isCorrect result = 
                 match result with
-                | Success context -> Option.isNone context.Metadata.User
+                | Success context -> Option.isNone context.Metadata.Пользователь
                 | _ -> false
 
             getArgs' ()
@@ -296,11 +296,11 @@ module ``Execution facts`` =
             {
                 Metadata = 
                     {
-                        OperationMetadata.Empty
+                        МетаданныеОперации.Empty
                         with
-                            Request = 
+                            Запрос = 
                                 {
-                                    Request.Empty
+                                    Запрос.Empty
                                     with
                                         Url = 
                                             {

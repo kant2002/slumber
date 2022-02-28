@@ -16,14 +16,14 @@
       <Link>AssemblyInfo.Common.fs</Link>
     </Compile>
     <Compile Include="Common.fs" />
-    <Compile Include="Logging.fs" />
+    <Compile Include="Протоколирование.fs" />
     <Compile Include="Framework.fs" />
     <Compile Include="Render.fs" />
-    <Compile Include="Execution.fs" />
-    <Compile Include="Discovery.fs" />
+    <Compile Include="Выполнение.fs" />
+    <Compile Include="Обнаружение.fs" />
     <Compile Include="Bootstrap.fs" />
     <Compile Include="Pipeline.fs" />
-    <Compile Include="Handler.fs" />
+    <Compile Include="Обработчик.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
 </Project>

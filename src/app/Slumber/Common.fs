@@ -1,4 +1,4 @@
-namespace Slumber
+﻿namespace Дрема
 
 open System
 
@@ -22,7 +22,7 @@ module Common =
         | _ -> Failure error   
 
     ///Record describing basic user properties
-    type UserData = {
+    type ДанныеПользователя = {
         Id : String;
         Properties : (String * String) list;
     }
@@ -109,7 +109,7 @@ module Common =
             
         ///Contains functions for working with HTTP headers                
         [<RequireQualifiedAccess>]
-        module Headers = 
+        module Заголовки = 
 
             let [<Literal>] ContentType = "Content-Type"
             let [<Literal>] Accept = "Accept"
@@ -125,18 +125,18 @@ module Common =
                 )
 
             ///Picks a non-empty header value from a key/value list
-            let getNonEmptyValue key headers = 
+            let получитьНепустоеЗначение key headers = 
                 match (getValue key headers) with
                 | Some value when not (String.IsNullOrWhiteSpace value) -> Some value
                 | _ -> None
 
             ///Gets the value of the Content-Type header from a key/value list
             let getContentType =
-                getNonEmptyValue ContentType
+                получитьНепустоеЗначение ContentType
 
             ///Gets the value of the Accept header from a key/value list
             let getAccept = 
-                getNonEmptyValue Accept    
+                получитьНепустоеЗначение Accept    
 
         ///Represents various forms of a request URL
         type Urls = {
@@ -161,21 +161,21 @@ module Common =
 
         ///Represents an HTTP request or response payload
         type Payload = {
-            Headers : (String * String) list;
-            Body : Stream option;
+            Заголовки : (String * String) list;
+            Тело : Stream option;
         }
         with
 
             ///The empty HTTP payload
             static member Empty = 
                 {
-                    Headers = [];
-                    Body = None;
+                    Заголовки = [];
+                    Тело = None;
                 }
 
 
         ///Represents a basic HTTP request
-        type Request = {
+        type Запрос = {
             Id : Guid;
             Url : Urls;
             Verb : String;
@@ -198,7 +198,7 @@ module Common =
             | Resource of (Int32 * Byte list)
 
         ///Describes an HTTP response
-        type Response = {
+        type Ответ = {
             ResponseType : ResponseType;
             ContentType : String option;
             CustomHeaders : (String * String) list;
@@ -215,8 +215,8 @@ module Common =
 
         ///Describes a raw HTTP response
         type IOutput = 
-            abstract member WriteBody : Byte list -> Async<unit>
-            abstract member WriteHeader : String -> String -> Async<unit>
+            abstract member ЗаписатьТело : Byte list -> Async<unit>
+            abstract member ЗаписатьЗаголовок : String -> String -> Async<unit>
             abstract member SetStatusCode : Int32 -> Async<unit>
             
         ///Wraps a raw HTTP response in the IOutput interface
@@ -227,14 +227,14 @@ module Common =
 
             interface IOutput with
 
-                member this.WriteBody bytes = 
+                member this.ЗаписатьТело bytes = 
                     async {
                         do! raw.OutputStream.AsyncWrite (List.toArray bytes)
                     }
 
-                member this.WriteHeader key value = 
+                member this.ЗаписатьЗаголовок key value = 
                     async {
-                        if (String.same Headers.ContentType key) then
+                        if (String.same Заголовки.ContentType key) then
                             raw.ContentType <- value
                         else
                             raw.Headers.[key] <- value
@@ -273,12 +273,12 @@ module Common =
                     None
 
             {
-                Headers = raw.Headers |> NameValueCollection.toList;
-                Body = body;
+                Заголовки = raw.Headers |> NameValueCollection.toList;
+                Тело = body;
             }
 
         ///Parses an HTTP request
-        let parseRequest (raw : HttpRequestBase) requestId = 
+        let разобратьЗапрос (raw : HttpRequestBase) requestId = 
             {
                 Id = requestId;
                 Url = (parseUrls raw);
@@ -288,12 +288,12 @@ module Common =
 
         ///Extension methods for HTTP objects
         [<AutoOpen>] 
-        module HttpExtensions = 
+        module ХттпРасширения = 
 
             ///HTTP request extension methods
             type HttpRequestBase with
                 member this.Parse requestId = 
-                    parseRequest this requestId
+                    разобратьЗапрос this requestId
 
             ///HTTP response extension methods
             type HttpResponseBase with
@@ -306,30 +306,30 @@ module Common =
                 member this.GetInput requestId = this.Request.Parse requestId
 
         ///Creates an absolute URL from a base URL and a relative URL
-        let createAbsoluteUri (baseUrl : Uri) (relativeUrl : String) = 
+        let создатьАбсолютныйУри (базовыйУрл : Uri) (относительныйУрл : String) = 
 
             //NOTE That this function adds/removes slashes in the base and relative URLs. This is to 
             //maintain expected behaviour when working with extensionless URLs. By default, for example
             //http://localhost/app + api will result in http://localhost/api whereas the expected result is
             //likely http://localhost/app/api.
 
-            let relativeUrl' = 
-                if (relativeUrl.StartsWith "/") then
-                    relativeUrl.Substring 1
+            let относительныйУрл' = 
+                if (относительныйУрл.StartsWith "/") then
+                    относительныйУрл.Substring 1
                 else
-                    relativeUrl
+                    относительныйУрл
 
-            let baseUrl' = 
-                if not (baseUrl.AbsoluteUri.EndsWith "/") then
-                    Uri (baseUrl.AbsoluteUri + "/", UriKind.Absolute)
+            let базовыйУрл' = 
+                if not (базовыйУрл.AbsoluteUri.EndsWith "/") then
+                    Uri (базовыйУрл.AbsoluteUri + "/", UriKind.Absolute)
                 else
-                    baseUrl
+                    базовыйУрл
 
-            Uri (baseUrl', relativeUrl')        
+            Uri (базовыйУрл', относительныйУрл')        
 
     ///Contains functions for working with operations
     [<AutoOpen>]
-    module Operations = 
+    module Операции = 
 
         let [<Literal>] DefaultUrl = "http://localhost"
 
@@ -337,12 +337,12 @@ module Common =
         type Resolver = Type -> obj option
 
         ///Represents metadata about an operation request
-        type OperationMetadata = {
+        type МетаданныеОперации = {
             ContainerUrl : Uri;
             EndpointName : String;
-            Request : Request;
-            Parameters : (String * String) list;
-            User : UserData option;
+            Запрос : Запрос;
+            Параметры : (String * String) list;
+            Пользователь : ДанныеПользователя option;
             Resolver : Resolver option;
         }
         with
@@ -358,15 +358,15 @@ module Common =
                 {
                     ContainerUrl = Uri (DefaultUrl, UriKind.Absolute);
                     EndpointName = String.Empty;
-                    Request = Request.Empty;
-                    Parameters = [];
-                    User = None;
+                    Запрос = Запрос.Empty;
+                    Параметры = [];
+                    Пользователь = None;
                     Resolver = None;
                 }
 
         ///Useful functions for working with metadata
         [<AutoOpen>]
-        module Metadata = 
+        module Метаданные = 
 
             ///Union describing the result of trying to get some metadata
             type TryGetResult<'TFound> = 
@@ -383,7 +383,7 @@ module Common =
 
             ///Gets the parameters from metadata
             let getParameters meta = 
-                meta.Parameters
+                meta.Параметры
 
             ///Gets the value of a parameter
             let getParameter key = 
@@ -432,7 +432,7 @@ module Common =
 
         ///Represents the context in which an operation is executed
         type OperationContext = {
-            Metadata : OperationMetadata;
+            Metadata : МетаданныеОперации;
             Message : obj option;
         }      
         with
@@ -440,7 +440,7 @@ module Common =
             ///The empty context
             static member Empty = 
                 {
-                    Metadata = OperationMetadata.Empty;
+                    Metadata = МетаданныеОперации.Empty;
                     Message = None;
                 }  
 

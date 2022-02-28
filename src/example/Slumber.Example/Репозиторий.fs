@@ -1,4 +1,4 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
 open System.IO

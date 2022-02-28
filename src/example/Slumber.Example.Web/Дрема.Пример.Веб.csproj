@@ -77,9 +77,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Slumber.Example\Slumber.Example.fsproj">
+    <ProjectReference Include="..\Slumber.Example\Дрема.Пример.fsproj">
       <Project>{037b7e04-e4b4-4fa6-98b1-4e88a728b70b}</Project>
-      <Name>Slumber.Example</Name>
+      <Name>Дрема.Пример</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

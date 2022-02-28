@@ -8,7 +8,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Slumber\Slumber.fsproj" />
+    <ProjectReference Include="..\Slumber\Дрема.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\AssemblyInfo.Common.fs">

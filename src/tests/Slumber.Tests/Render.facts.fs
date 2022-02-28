@@ -1,4 +1,4 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open System
 open System.IO
@@ -8,7 +8,7 @@ open FsUnit
 open Xunit
 open Xunit.Extensions
 open Foq
-open Slumber
+open Дрема
 
 module ``Render facts`` =
     
@@ -28,8 +28,8 @@ module ``Render facts`` =
 
             let getOutput () = 
                 Mock<IOutput>()
-                    .Setup(fun o -> <@ o.WriteBody (any ()) @>).Returns(async { return () })    
-                    .Setup(fun o -> <@ o.WriteHeader (any ()) (any ()) @>).Returns(async { return () })
+                    .Setup(fun o -> <@ o.ЗаписатьТело (any ()) @>).Returns(async { return () })    
+                    .Setup(fun o -> <@ o.ЗаписатьЗаголовок (any ()) (any ()) @>).Returns(async { return () })
                     .Setup(fun o -> <@ o.SetStatusCode (any ()) @>).Returns(async { return () })
                     .Create()
 
@@ -60,7 +60,7 @@ module ``Render facts`` =
                 asyncWriteBody output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteBody (any ()) @> never
+                verify <@ output.ЗаписатьТело (any ()) @> never
 
             let [<Fact>] ``Nothing written to stream when body is zero length`` () =
                 
@@ -70,7 +70,7 @@ module ``Render facts`` =
                 asyncWriteBody output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteBody (any ()) @> never
+                verify <@ output.ЗаписатьТело (any ()) @> never
 
             let [<Fact>] ``Body is written correctly to stream`` () =
                 
@@ -81,7 +81,7 @@ module ``Render facts`` =
                 asyncWriteBody output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteBody body @> once
+                verify <@ output.ЗаписатьТело body @> once
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncWriteHeaders function`` = 
@@ -115,7 +115,7 @@ module ``Render facts`` =
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader Headers.ContentLength length' @> once
+                verify <@ output.ЗаписатьЗаголовок Заголовки.ContentLength length' @> once
 
             let [<Fact>] ``Content-Length header is set correctly for status response types`` () = 
                 
@@ -125,17 +125,17 @@ module ``Render facts`` =
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader Headers.ContentLength "0" @> once
+                verify <@ output.ЗаписатьЗаголовок Заголовки.ContentLength "0" @> once
 
             let [<Fact>] ``Content-Type header is set correctly when explicitly specified`` () =
                 
-                let response = getResponse None (Some "text/xml") [ (Headers.ContentType, "application/json") ]
+                let response = getResponse None (Some "text/xml") [ (Заголовки.ContentType, "application/json") ]
                 let output = getOutput ()
 
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader Headers.ContentType "application/json" @> once
+                verify <@ output.ЗаписатьЗаголовок Заголовки.ContentType "application/json" @> once
 
             let [<Fact>] ``Content-Type header is set correcrtly when not explicitly specified`` () =
                 
@@ -145,7 +145,7 @@ module ``Render facts`` =
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader Headers.ContentType "text/xml" @> once
+                verify <@ output.ЗаписатьЗаголовок Заголовки.ContentType "text/xml" @> once
 
             let [<Fact>] ``Content-Type header is ommitted when not explicitly set and not specified in response`` () =
                 
@@ -155,7 +155,7 @@ module ``Render facts`` =
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader Headers.ContentType (any ()) @> never
+                verify <@ output.ЗаписатьЗаголовок Заголовки.ContentType (any ()) @> never
 
             let [<Fact>] ``Custom headers are set`` () =
                 
@@ -165,7 +165,7 @@ module ``Render facts`` =
                 asyncWriteHeaders output response
                 |> Async.RunSynchronously
 
-                verify <@ output.WriteHeader "Custom" "Value" @> once
+                verify <@ output.ЗаписатьЗаголовок "Custom" "Value" @> once
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncWrite function`` =
@@ -232,6 +232,6 @@ module ``Render facts`` =
         let [<Fact>] ``Stopped (completed) state returns response`` () = 
 
             let response = 
-                { Response.Empty with ResponseType = StatusCode (418); }
+                { Ответ.Empty with ResponseType = StatusCode (418); }
 
             Stopped (Completed response) |> getResponse |> getStatusCode |> should equal 418

@@ -1,4 +1,4 @@
-﻿namespace Slumber.IO.Tests
+﻿namespace Дрема.IO.Tests
 
 open System
 open System.IO
@@ -6,7 +6,7 @@ open System.Runtime.Serialization
 open System.Text
 open FsUnit.Xunit
 open Xunit
-open Slumber.IO.DataContract
+open Дрема.IO.DataContract
 
 module ``DataContract facts`` =
 
@@ -65,26 +65,23 @@ module ``DataContract facts`` =
 
             override this.GetHashCode () = 1
 
-    [<AutoOpen>]
-    module TestData =
-        let simpleRecord = { SimpleRecord.Value = "Hello, World"; }
-        let complexRecord = { ComplexRecord.Value = "Hello, World (1)"; Child = { SimpleRecord.Value = "Hello, World (2)"; }; }
-        let optionalRecordSome = { OptionalRecord.Child = Some ({ SimpleRecord.Value = "Hello, World"; }); }
-        let optionalRecordNone = { OptionalRecord.Child = None; }
-        let collectionRecord = { CollectionRecord.Items = [ { OptionalRecord.Child = None; }; { OptionalRecord.Child = Some { SimpleRecord.Value = "Hello, World"; }; }; ]; }
-
     module ``Xml facts`` = 
 
         let [<Literal>] ModuleName = "IO.DataContract.Xml"
 
-        let simpleData = "<simple xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World</value></simple>"
-        let complexData = "<complex xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World (1)</value><child><value>Hello, World (2)</value></child></complex>"
-        let optionalDataSome = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child><value>Hello, World</value></child></optional>"
-        let optionalDataNone = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child i:nil=\"true\" /></optional>"
-        let collectionData = "<collection xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><items><optional><child i:nil=\"true\" /></optional><optional><child><value>Hello, World</value></child></optional></items></collection>"
-
         [<Trait (Traits.Names.Module, ModuleName)>]
-        module ``read facts`` = 
+        type ``read facts``() = 
+            let simpleData = "<simple xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World</value></simple>"
+            let complexData = "<complex xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World (1)</value><child><value>Hello, World (2)</value></child></complex>"
+            let optionalDataSome = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child><value>Hello, World</value></child></optional>"
+            let optionalDataNone = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child i:nil=\"true\" /></optional>"
+            let collectionData = "<collection xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><items><optional><child i:nil=\"true\" /></optional><optional><child><value>Hello, World</value></child></optional></items></collection>"
+              
+            let simpleRecord = { SimpleRecord.Value = "Hello, World"; }
+            let complexRecord = { ComplexRecord.Value = "Hello, World (1)"; Child = { SimpleRecord.Value = "Hello, World (2)"; }; }
+            let optionalRecordSome = { OptionalRecord.Child = Some ({ SimpleRecord.Value = "Hello, World"; }); }
+            let optionalRecordNone = { OptionalRecord.Child = None; }
+            let collectionRecord = { CollectionRecord.Items = [ { OptionalRecord.Child = None; }; { OptionalRecord.Child = Some { SimpleRecord.Value = "Hello, World"; }; }; ]; }
 
             let [<Fact>] ``Simple record is deserialised correctly`` () = 
                 let stream = getStream simpleData
@@ -122,7 +119,18 @@ module ``DataContract facts`` =
                     |> should equal collectionRecord
 
         [<Trait (Traits.Names.Module, ModuleName)>]
-        module ``write facts`` = 
+        type ``write facts``() = 
+            let simpleData = "<simple xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World</value></simple>"
+            let complexData = "<complex xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><value>Hello, World (1)</value><child><value>Hello, World (2)</value></child></complex>"
+            let optionalDataSome = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child><value>Hello, World</value></child></optional>"
+            let optionalDataNone = "<optional xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><child i:nil=\"true\" /></optional>"
+            let collectionData = "<collection xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><items><optional><child i:nil=\"true\" /></optional><optional><child><value>Hello, World</value></child></optional></items></collection>"
+              
+            let simpleRecord = { SimpleRecord.Value = "Hello, World"; }
+            let complexRecord = { ComplexRecord.Value = "Hello, World (1)"; Child = { SimpleRecord.Value = "Hello, World (2)"; }; }
+            let optionalRecordSome = { OptionalRecord.Child = Some ({ SimpleRecord.Value = "Hello, World"; }); }
+            let optionalRecordNone = { OptionalRecord.Child = None; }
+            let collectionRecord = { CollectionRecord.Items = [ { OptionalRecord.Child = None; }; { OptionalRecord.Child = Some { SimpleRecord.Value = "Hello, World"; }; }; ]; }
 
             let [<Fact>] ``Simple record is serialised correctly`` () =
                 simpleRecord
@@ -158,15 +166,20 @@ module ``DataContract facts`` =
 
         let [<Literal>] ModuleName = "IO.DataContract.Json"
 
-        let simpleData = "{\"value\":\"Hello, World\"}"
-        let complexData = "{\"value\":\"Hello, World (1)\",\"child\":{\"value\":\"Hello, World (2)\"}}"
-        let optionalDataSome = "{\"child\":{\"value\":\"Hello, World\"}}"
-        let optionalDataNone = "{\"child\":null}"
-        let collectionData = "{\"items\":[{\"child\":null},{\"child\":{\"value\":\"Hello, World\"}}]}"
-
         [<Trait (Traits.Names.Module, ModuleName)>]
-        module ``read facts`` = 
-            
+        type ``read facts``() = 
+            let simpleData = "{\"value\":\"Hello, World\"}"
+            let complexData = "{\"value\":\"Hello, World (1)\",\"child\":{\"value\":\"Hello, World (2)\"}}"
+            let optionalDataSome = "{\"child\":{\"value\":\"Hello, World\"}}"
+            let optionalDataNone = "{\"child\":null}"
+            let collectionData = "{\"items\":[{\"child\":null},{\"child\":{\"value\":\"Hello, World\"}}]}"
+              
+            let simpleRecord = { SimpleRecord.Value = "Hello, World"; }
+            let complexRecord = { ComplexRecord.Value = "Hello, World (1)"; Child = { SimpleRecord.Value = "Hello, World (2)"; }; }
+            let optionalRecordSome = { OptionalRecord.Child = Some ({ SimpleRecord.Value = "Hello, World"; }); }
+            let optionalRecordNone = { OptionalRecord.Child = None; }
+            let collectionRecord = { CollectionRecord.Items = [ { OptionalRecord.Child = None; }; { OptionalRecord.Child = Some { SimpleRecord.Value = "Hello, World"; }; }; ]; }
+  
             let [<Fact>] ``Simple record is deserialised correctly`` () = 
                 let stream = getStream simpleData
                 in
@@ -203,7 +216,18 @@ module ``DataContract facts`` =
                     |> should equal collectionRecord
 
         [<Trait (Traits.Names.Module, ModuleName)>]
-        module ``write facts`` = 
+        type ``write facts``() = 
+            let simpleData = "{\"value\":\"Hello, World\"}"
+            let complexData = "{\"value\":\"Hello, World (1)\",\"child\":{\"value\":\"Hello, World (2)\"}}"
+            let optionalDataSome = "{\"child\":{\"value\":\"Hello, World\"}}"
+            let optionalDataNone = "{\"child\":null}"
+            let collectionData = "{\"items\":[{\"child\":null},{\"child\":{\"value\":\"Hello, World\"}}]}"
+              
+            let simpleRecord = { SimpleRecord.Value = "Hello, World"; }
+            let complexRecord = { ComplexRecord.Value = "Hello, World (1)"; Child = { SimpleRecord.Value = "Hello, World (2)"; }; }
+            let optionalRecordSome = { OptionalRecord.Child = Some ({ SimpleRecord.Value = "Hello, World"; }); }
+            let optionalRecordNone = { OptionalRecord.Child = None; }
+            let collectionRecord = { CollectionRecord.Items = [ { OptionalRecord.Child = None; }; { OptionalRecord.Child = Some { SimpleRecord.Value = "Hello, World"; }; }; ]; }
 
             let [<Fact>] ``Simple record is serialised correctly`` () =
                 simpleRecord

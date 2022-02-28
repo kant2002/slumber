@@ -1,9 +1,9 @@
-﻿namespace Slumber.Tests
+﻿namespace Дрема.Tests
 
 open System
 open FsUnit
 open Xunit
-open Slumber
+open Дрема
 
 module ``Setup facts`` =
     
@@ -43,7 +43,7 @@ module ``Setup facts`` =
                 assertIsFunction (fun (arg0 : Int32) (arg1 : String) -> ())
 
             let [<Fact>] ``Correct value returned for function (5)`` () = 
-                assertIsFunction (fun (_ : OperationMetadata) -> ())
+                assertIsFunction (fun (_ : МетаданныеОперации) -> ())
 
             let [<Fact>] ``Correct value returned for function (6)`` () = 
                 assertIsFunction (fun () -> OperationResult.Empty)
@@ -171,11 +171,11 @@ module ``Setup facts`` =
                 getArgumentType' (fun () -> ()) |> isUnit |> should be True
 
             let [<Fact>] ``Returns Metadata for OperationMetadata`` () =
-                getArgumentType' (fun (_ : OperationMetadata) -> ()) |> isMetadata |> should be True
+                getArgumentType' (fun (_ : МетаданныеОперации) -> ()) |> isMetadata |> should be True
 
             let [<Fact>] ``SetupException is thrown for optional OperationMetadata`` () =
                 (fun () ->
-                    getArgumentType' (fun (_ : OperationMetadata option) -> ())
+                    getArgumentType' (fun (_ : МетаданныеОперации option) -> ())
                     |> ignore
                 ) |> should throw typeof<SetupException>
 
@@ -205,18 +205,18 @@ module ``Setup facts`` =
                 let withQueryParameter key value context = 
                     
                     let request = 
-                        { context.Metadata.Request
+                        { context.Metadata.Запрос
                             with
                                 Url = 
-                                    { context.Metadata.Request.Url
+                                    { context.Metadata.Запрос.Url
                                         with
-                                            Query = ((key, value) :: context.Metadata.Request.Url.Query);
+                                            Query = ((key, value) :: context.Metadata.Запрос.Url.Query);
                                     };
                         }
 
                     { context 
                         with
-                            Metadata =  { context.Metadata with Request = request; };                                
+                            Metadata =  { context.Metadata with Запрос = request; };                                
                     }
 
                 let withUriParameter key value context = 
@@ -224,7 +224,7 @@ module ``Setup facts`` =
                     let metadata = 
                         { context.Metadata
                             with
-                                Parameters = ((key, value) :: context.Metadata.Parameters);
+                                Параметры = ((key, value) :: context.Metadata.Параметры);
                         }
 
                     { context with Metadata = metadata; }
@@ -615,11 +615,11 @@ module ``Setup facts`` =
                         {
                             Metadata = 
                                 {
-                                    OperationMetadata.Empty
+                                    МетаданныеОперации.Empty
                                     with
-                                        Request = 
+                                        Запрос = 
                                             { 
-                                                Request.Empty 
+                                                Запрос.Empty 
                                                 with
                                                     Url = 
                                                         {
@@ -686,7 +686,7 @@ module ``Setup facts`` =
                                 {
                                     context.Metadata
                                     with
-                                        Parameters = [ ("arg", "value"); ];
+                                        Параметры = [ ("arg", "value"); ];
                                 }
                     }
 
@@ -709,14 +709,14 @@ module ``Setup facts`` =
                     
                     let url = 
                         {
-                            context.Metadata.Request.Url
+                            context.Metadata.Запрос.Url
                             with
                                 Query = [ ("arg", "value"); ];
                         }
 
-                    let request = { context.Metadata.Request with Url = url; }
+                    let request = { context.Metadata.Запрос with Url = url; }
 
-                    { context with Metadata = { context.Metadata with Request = request; }; }
+                    { context with Metadata = { context.Metadata with Запрос = request; }; }
 
                 bindModifyAndCall modifier op
                 |> ignore
@@ -753,7 +753,7 @@ module ``Setup facts`` =
                 
                 let _called = ref false
 
-                bindAndCall' (fun (meta : OperationMetadata) (_ : Int32 option) -> 
+                bindAndCall' (fun (meta : МетаданныеОперации) (_ : Int32 option) -> 
 
                     _called := true
 
@@ -884,10 +884,10 @@ module ``Setup facts`` =
 
         let [<Literal>] ModuleName = "Setup.Containers"
 
-        [<Trait (Traits.Names.Module, ModuleName)>]
-        module ``containerAt function`` = 
+        open System.Web
 
-            open System.Web
+        [<Trait (Traits.Names.Module, ModuleName)>]
+        type ``containerAt function``() = 
 
             let uri = 
                 Uri ("http://localhost", UriKind.Absolute)
@@ -913,7 +913,7 @@ module ``Setup facts`` =
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``authenticatedBy function`` = 
 
-            let auth (_ : Request) = 
+            let auth (_ : Запрос) = 
                 Deny
 
             let setDefault mode container = 

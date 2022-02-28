@@ -1,11 +1,11 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
 open System.Web
 open System.IO
 open log4net
 open log4net.Config
-open Slumber.Logging
+open Дрема.Logging
 
 type App () = 
     inherit HttpApplication ()

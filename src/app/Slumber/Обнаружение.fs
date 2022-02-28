@@ -1,17 +1,17 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
-open Slumber.Common.Attempt
-open Slumber.Execution
-open Slumber.Framework
-open Slumber.Framework.Helpers
+open Дрема.Common.Attempt
+open Дрема.Execution
+open Дрема.Framework
+open Дрема.Framework.Helpers
 
 ///Contains functions and types for identifying the binding, content types and user of a request
 module Discovery = 
 
     ///Represents the arguments used to execute the discovery phase
     type DiscoveryArgs = {
-        Request : Request;
+        Request : Запрос;
         Container : Container;
     }
 
@@ -35,8 +35,8 @@ module Discovery =
     module Matching = 
         
         open System.IO
-        open Slumber.Common.AsyncAttempt
-        open Slumber.Framework.Core.Endpoints
+        open Дрема.Common.AsyncAttempt
+        open Дрема.Framework.Core.Endpoints
 
         ///Normalises a URL for template matching, ensuring folder-level URLs end with a trailing slash.
         ///This is important for cases when the base URL and candidate URL are essentially equal - e.g.
@@ -170,7 +170,7 @@ module Discovery =
     ///Contains functions for negotiating content types based on the Content-Type and Accept header
     module Negotiation = 
 
-        open Slumber.Framework.Core.Containers
+        open Дрема.Framework.Core.Containers
 
         ///The default content type to be used if the Content-Type of Accept headers are omitted
         let [<Literal>] DefaultMediaType = MediaTypes.Text.Xml
@@ -185,7 +185,7 @@ module Discovery =
                 logInfo "[%A] Negotiating request content type" args.Request.Id
 
                 let requestedContentType = 
-                    match (Headers.getContentType args.Request.Payload.Headers) with
+                    match (Заголовки.getContentType args.Request.Payload.Заголовки) with
                     | Some contentType -> contentType
                     | _ -> DefaultMediaType
 
@@ -216,7 +216,7 @@ module Discovery =
                 logInfo "[%A] Negotiating response content type" args.Request.Id
 
                 let requestedContentType = 
-                    match (Headers.getAccept args.Request.Payload.Headers) with
+                    match (Заголовки.getAccept args.Request.Payload.Заголовки) with
                     | Some contentType when (contentType <> AnyContentType) -> contentType
                     | _ -> DefaultMediaType
 

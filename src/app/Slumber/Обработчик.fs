@@ -1,8 +1,8 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Web
-open Slumber.Framework
+open Дрема.Framework
 
 ///Default implementation of an HTTP handler for Slumber
 type SlumberHandler () =

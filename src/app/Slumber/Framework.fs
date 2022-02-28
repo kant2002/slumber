@@ -1,4 +1,4 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 
@@ -80,13 +80,13 @@ module Framework =
 
         ///Union describing possible results of user authentication
         type AuthenticationResult = 
-            | Allow of (UserData option)
+            | Allow of (ДанныеПользователя option)
             | Deny        
 
         ///Represents the security configuration of a container
         type SecurityConfig = {
             DefaultMode : SecurityMode;
-            Authenticate : (Request -> AuthenticationResult) option;
+            Authenticate : (Запрос -> AuthenticationResult) option;
         }
         with
 
@@ -232,7 +232,7 @@ module Framework =
         ///Describes reasons for the pipeline to stop
         type StopType = 
             | Exception of Exception
-            | Completed of Response
+            | Completed of Ответ
 
         ///Describes possible pipeline states
         type State<'TState> = 

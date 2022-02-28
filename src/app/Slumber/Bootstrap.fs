@@ -1,16 +1,16 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Web
-open Slumber.Framework
-open Slumber.Discovery
-open Slumber.Common.Http
+open Дрема.Framework
+open Дрема.Discovery
+open Дрема.Common.Http
 
 ///Contains functions used to parse the raw HTTP request and initialise Slumber's configuration
 module Bootstrap = 
 
     ///Runs the bootstrapping phase asynchronously
-    let asyncRun mode (request : Request) =
+    let asyncRun mode (request : Запрос) =
         async {
 
             let mode' = 

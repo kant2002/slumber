@@ -1,9 +1,9 @@
-﻿namespace Slumber.IO
+﻿namespace Дрема.IO
 
 open System
 open System.IO
 open System.Runtime.Serialization
-open Slumber.Framework.MessageIO
+open Дрема.Framework.MessageIO
 
 module DataContract = 
 

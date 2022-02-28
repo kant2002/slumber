@@ -5,11 +5,11 @@
 	</PropertyGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
-    <Compile Include="Repository.fs" />
+    <Compile Include="Репозиторий.fs" />
     <Compile Include="Startup.fs" />
-    <Compile Include="People.fs" />
-    <Compile Include="Config.fs" />
-    <Compile Include="App.fs" />
+    <Compile Include="Люди.fs" />
+    <Compile Include="Конфиг.fs" />
+    <Compile Include="Приложение.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.14" />
@@ -21,7 +21,7 @@
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-    <ProjectReference Include="..\..\app\Slumber.IO\Slumber.IO.fsproj" />
-    <ProjectReference Include="..\..\app\Slumber\Slumber.fsproj" />
+    <ProjectReference Include="..\..\app\Slumber.IO\Дрема.IO.fsproj" />
+    <ProjectReference Include="..\..\app\Slumber\Дрема.fsproj" />
   </ItemGroup>
 </Project>

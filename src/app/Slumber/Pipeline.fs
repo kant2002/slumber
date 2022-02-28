@@ -1,14 +1,14 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Web
-open Slumber.Framework
+open Дрема.Framework
 
 ///Contains functions for running the default Slumber pipeline
 module Pipeline = 
 
     ///Runs the standard Slumber pipeline asynchronously
-    let asyncRun mode (input : Request) (output : IOutput) = 
+    let asyncRun mode (input : Запрос) (output : IOutput) = 
 
         logInfo "[%A] Pipeline begins for request to %A" input.Id input.Url.Raw.AbsoluteUri
 

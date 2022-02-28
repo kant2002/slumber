@@ -1,11 +1,11 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Text
 open System.Web
 open System.IO
 open System.Collections.Specialized
-open Slumber.Framework
+open Дрема.Framework
 
 ///Contains functions used to render the HTTP response 
 module Render =
@@ -22,7 +22,7 @@ module Render =
                 match args.ResponseType with
                 | StatusCode _ -> ()
                 | Resource (_, []) -> ()
-                | Resource (_, bytes) -> do! output.WriteBody (bytes)                    
+                | Resource (_, bytes) -> do! output.ЗаписатьТело (bytes)                    
             }     
         
         ///Writes the response headers to the given output
@@ -35,14 +35,14 @@ module Render =
                     | StatusCode _ -> 0
                     | Resource (_, bytes) -> List.length bytes
                     
-                (Headers.ContentLength, (string value)) :: headers
+                (Заголовки.ContentLength, (string value)) :: headers
 
             let addContentType headers = 
 
-                let currentValue = headers |> Headers.getContentType
+                let currentValue = headers |> Заголовки.getContentType
 
                 match (currentValue, args.ContentType) with
-                | (None, Some value) -> (Headers.ContentType, value) :: headers
+                | (None, Some value) -> (Заголовки.ContentType, value) :: headers
                 | _ -> headers
 
             async {
@@ -50,7 +50,7 @@ module Render =
                 |> addContentLength
                 |> addContentType
                 |> List.iter (fun (key, value) ->
-                        output.WriteHeader key value
+                        output.ЗаписатьЗаголовок key value
                         |> Async.RunSynchronously
                     )
             }
@@ -89,7 +89,7 @@ module Render =
                 |> Array.toList
 
             {
-                Response.Empty
+                Ответ.Empty
                 with
                     ResponseType = Resource (StatusCodes.InternalServerError, bytes);
                     ContentType = Some MessageContentType;

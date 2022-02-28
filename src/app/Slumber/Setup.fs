@@ -1,8 +1,8 @@
-﻿namespace Slumber
+﻿namespace Дрема
 
 open System
 open System.Collections.Concurrent
-open Slumber.Framework
+open Дрема.Framework
 
 ///Contains functions for generating Slumber configuration in a fluent style
 module Setup = 
@@ -89,7 +89,7 @@ module Setup =
 
                     Unit'
 
-                else if (isType<OperationMetadata> summary.BaseType) then
+                else if (isType<МетаданныеОперации> summary.BaseType) then
 
                     if summary.IsOptional then
                         invalidSetup "Optional OperationMetadata is not supported."
@@ -146,7 +146,7 @@ module Setup =
                 let value = 
                     match (tryGetParameter name context.Metadata) with
                     | None -> 
-                        context.Metadata.Request.Url.Query
+                        context.Metadata.Запрос.Url.Query
                         |> List.tryPick (fun (key, value) ->
                                 if (String.same key name) then
                                     Some value
@@ -379,7 +379,7 @@ module Setup =
     [<AutoOpen>]
     module Endpoints = 
 
-        open Slumber.Framework.Core.Endpoints
+        open Дрема.Framework.Core.Endpoints
 
         ///Creates an endpoint for the given URI template
         let endpointAt template = 
@@ -410,7 +410,7 @@ module Setup =
     module Containers = 
 
         open System.Web
-        open Slumber.Framework.Core.Containers
+        open Дрема.Framework.Core.Containers
 
         ///Creates an absolute URI
         let absoluteUri (uri : String) = 
@@ -418,7 +418,7 @@ module Setup =
 
         ///Creates an absolute URI from a relative URI
         let relativeUri baseUrl =
-            createAbsoluteUri baseUrl
+            создатьАбсолютныйУри baseUrl
 
         ///Creates a new container
         let containerAt (uri : Uri) = 

@@ -1,20 +1,20 @@
-﻿namespace Slumber.Example
+﻿namespace Дрема.Пример
 
 open System
-open Slumber
-open Slumber.Framework
-open Slumber.Setup
-open Slumber.IO.DataContract
+open Дрема
+open Дрема.Framework
+open Дрема.Setup
+open Дрема.IO.DataContract
 
 module Config = 
 
     type Description () = 
 
-        let authenticate (request : Request) = 
+        let authenticate (request : Запрос) = 
 
             let username = 
-                request.Payload.Headers
-                |> Headers.getValue "Authorization"
+                request.Payload.Заголовки
+                |> Заголовки.getValue "Authorization"
 
             match username with
             | Some username' -> Allow (Some { Id = username'; Properties = []; })

@@ -1,1 +1,1 @@
-﻿<%@ Application Inherits="Slumber.Example.App" %>
+﻿<%@ Application Inherits="Дрема.Пример.App" %>
