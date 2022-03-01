@@ -386,18 +386,18 @@ module Setup =
             {
                 Endpoint.Empty
                 with
-                    Name = string (Guid.NewGuid ());
-                    Template = template;
+                    Название = string (Guid.NewGuid ());
+                    Шаблон = template;
             }
 
         ///Assigns a name to an endpoint
         let named name endpoint = 
-            { endpoint with Name = name; }
+            { endpoint with Название = name; }
 
         ///Adds a binding to an endpoint
         let supporting (binding : Binding) endpoint =
             match (tryGetBinding binding.Verb endpoint) with
-            | Some _ -> invalidSetup (String.Format ("The verb {0} is already bound for endpoint at {1}", binding.Verb, endpoint.Template))
+            | Some _ -> invalidSetup (String.Format ("The verb {0} is already bound for endpoint at {1}", binding.Verb, endpoint.Шаблон))
             | _ -> 
                 { 
                     endpoint 
@@ -427,7 +427,7 @@ module Setup =
                 raise (NotSupportedException ("Relative base URLs are not supported. Consider using the relativeUrl function to create an absolute URL."))
 
             {
-                Container.Empty
+                Контейнер.Empty
                 with
                     BaseUrl = uri;
             }
@@ -459,21 +459,21 @@ module Setup =
         let with' endpoint container = 
 
             let template = 
-                UriTemplate (endpoint.Template)
+                UriTemplate (endpoint.Шаблон)
 
             let existing = 
                 container.Endpoints
                 |> List.tryFind (fun endpoint' ->
                     
                         let template' = 
-                            UriTemplate (endpoint'.Template)
+                            UriTemplate (endpoint'.Шаблон)
                             
                         template'.IsEquivalentTo (template)
                     )
 
             match existing with
             | Some endpoint' -> 
-                invalidSetup (String.Format ("The template {0} is equivalent to the template {1} which already exists.", endpoint.Template, endpoint'.Template))
+                invalidSetup (String.Format ("The template {0} is equivalent to the template {1} which already exists.", endpoint.Шаблон, endpoint'.Шаблон))
             | _ ->
                 {
                     container
@@ -482,7 +482,7 @@ module Setup =
                 }
 
         ///Sets the dependency resolver for a container
-        let resolveUsing f (container : Container) = 
+        let resolveUsing f (container : Контейнер) = 
             { container with Resolver = (Some f); }
 
         ///Adds a reader to a container
@@ -525,12 +525,12 @@ module Setup =
                             {
                                 container.IO
                                 with
-                                    ForwardedTypes = (fromContentType, toContentType) :: container.IO.ForwardedTypes;
+                                    ПеренаправляемыеТипы = (fromContentType, toContentType) :: container.IO.ПеренаправляемыеТипы;
                             }
                 }    
 
         ///Applies a binding to all endpoints
-        let all (binding : Binding) (container : Container) = 
+        let all (binding : Binding) (container : Контейнер) = 
 
             let verbAlreadyUsed = 
                 container.Endpoints

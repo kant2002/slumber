@@ -32,16 +32,16 @@ module Startup =
 
         let services = 
             container.Endpoints
-            |> List.filter (fun endpoint -> not (Regex.IsMatch (endpoint.Template, "{.+?}"))) //Display only top level, non-parameterised endpoints
+            |> List.filter (fun endpoint -> not (Regex.IsMatch (endpoint.Шаблон, "{.+?}"))) //Display only top level, non-parameterised endpoints
             |> List.map (fun endpoint ->
 
                     let url = 
-                        match endpoint.Template with
+                        match endpoint.Шаблон with
                         | "/" -> string baseUrl
-                        | _ -> string (создатьАбсолютныйУри baseUrl endpoint.Template)
+                        | _ -> string (создатьАбсолютныйУри baseUrl endpoint.Шаблон)
 
                     {
-                        Name = endpoint.Name;
+                        Name = endpoint.Название;
                         Url = url;
                     }
                 )

@@ -615,7 +615,7 @@ module ``Setup facts`` =
                         {
                             Metadata = 
                                 {
-                                    МетаданныеОперации.Empty
+                                    МетаданныеОперации.Пустые
                                     with
                                         Запрос = 
                                             { 
@@ -914,7 +914,7 @@ module ``Setup facts`` =
         module ``authenticatedBy function`` = 
 
             let auth (_ : Запрос) = 
-                Deny
+                Запрещено
 
             let setDefault mode container = 
                 { container with Security = { container.Security with DefaultMode = mode }; }
@@ -922,7 +922,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Sets authentication function`` () =
 
                 let config =
-                    Container.Empty
+                    Контейнер.Empty
                     |> authenticatedBy auth false
                     |> getSecurityConfig
 
@@ -931,7 +931,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Sets default mode to private when privateByDefault is true`` () =
                 
                 let config = 
-                    Container.Empty
+                    Контейнер.Empty
                     |> setDefault Public
                     |> authenticatedBy auth true
                     |> getSecurityConfig
@@ -941,7 +941,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Sets default mode to public when privateByDefault is false`` () =
 
                 let config = 
-                    Container.Empty
+                    Контейнер.Empty
                     |> setDefault Private
                     |> authenticatedBy auth false
                     |> getSecurityConfig
@@ -954,26 +954,26 @@ module ``Setup facts`` =
             let [<Fact>] ``Endpoint is added to container`` () =
                 
                 let endpoint = 
-                    { Endpoint.Empty with Template = "/"; }
+                    { Endpoint.Empty with Шаблон = "/"; }
 
                 let endpoint' = 
-                    Container.Empty
+                    Контейнер.Empty
                     |> with' endpoint
                     |> getEndpoints
                     |> List.head
 
-                Assert.Equal<String> ("/", endpoint'.Template)
+                Assert.Equal<String> ("/", endpoint'.Шаблон)
 
             let [<Fact>] ``Endpoints with equivalent templates raises SetupException`` () =
                 
                 let endpoint1 = 
-                    { Endpoint.Empty with Template = "/{id}"; }
+                    { Endpoint.Empty with Шаблон = "/{id}"; }
 
                 let endpoint2 = 
-                    { Endpoint.Empty with Template = "/{no}"; }
+                    { Endpoint.Empty with Шаблон = "/{no}"; }
 
                 (fun () ->
-                    Container.Empty
+                    Контейнер.Empty
                     |> with' endpoint1
                     |> with' endpoint2
                     |> ignore
@@ -996,7 +996,7 @@ module ``Setup facts`` =
 
                 let container = 
                     {
-                        Container.Empty
+                        Контейнер.Empty
                         with
                             Endpoints = 
                                 [
@@ -1014,7 +1014,7 @@ module ``Setup facts`` =
                 
                 let container = 
                     {
-                        Container.Empty
+                        Контейнер.Empty
                         with
                             Endpoints = 
                                 [
@@ -1048,18 +1048,18 @@ module ``Setup facts`` =
                 []
 
             let [<Fact>] ``Writer is added to content types`` () =
-                Container.Empty
-                |> writing MediaTypes.Text.Xml write
-                |> getWriter MediaTypes.Text.Xml
+                Контейнер.Empty
+                |> writing МедиаТипы.Text.Xml write
+                |> getWriter МедиаТипы.Text.Xml
                 |> Option.isSome
                 |> should be True
 
             let [<Fact>] ``Duplicate content type raises SetupException`` () =
                 (fun () ->
 
-                    Container.Empty
-                    |> writing MediaTypes.Text.Xml write
-                    |> writing MediaTypes.Text.Xml write
+                    Контейнер.Empty
+                    |> writing МедиаТипы.Text.Xml write
+                    |> writing МедиаТипы.Text.Xml write
                     |> ignore
 
                 ) |> should throw typeof<SetupException>
@@ -1071,18 +1071,18 @@ module ``Setup facts`` =
                 None
 
             let [<Fact>] ``Reader is added to content types`` () =
-                Container.Empty
-                |> reading MediaTypes.Text.Xml read
-                |> getReader MediaTypes.Text.Xml
+                Контейнер.Empty
+                |> reading МедиаТипы.Text.Xml read
+                |> getReader МедиаТипы.Text.Xml
                 |> Option.isSome
                 |> should be True
 
             let [<Fact>] ``Duplicate content type raises SetupException`` () =
                 (fun () ->
 
-                    Container.Empty
-                    |> reading MediaTypes.Text.Xml read
-                    |> reading MediaTypes.Text.Xml read
+                    Контейнер.Empty
+                    |> reading МедиаТипы.Text.Xml read
+                    |> reading МедиаТипы.Text.Xml read
                     |> ignore
 
                 ) |> should throw typeof<SetupException>
@@ -1091,17 +1091,17 @@ module ``Setup facts`` =
         module ``forwarding function`` =
 
             let [<Fact>] ``Forwarded types are added to contianer`` () =
-                Container.Empty
-                |> forwarding MediaTypes.Text.Html MediaTypes.Text.Xml
-                |> applyForwarding MediaTypes.Text.Html
-                |> should equal MediaTypes.Text.Xml
+                Контейнер.Empty
+                |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> applyForwarding МедиаТипы.Text.Html
+                |> should equal МедиаТипы.Text.Xml
 
             let [<Fact>] ``Duplicate from type raises SetupException`` () =
                 (fun () ->
 
-                    Container.Empty
-                    |> forwarding MediaTypes.Text.Html MediaTypes.Text.Xml
-                    |> forwarding MediaTypes.Text.Html MediaTypes.Application.Json
+                    Контейнер.Empty
+                    |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                    |> forwarding МедиаТипы.Text.Html МедиаТипы.Application.Json
                     |> ignore
 
                 ) |> should throw typeof<SetupException>

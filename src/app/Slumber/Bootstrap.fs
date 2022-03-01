@@ -32,8 +32,8 @@ module Bootstrap =
 
             return 
                 {
-                    Request = request;
-                    Container = container;
+                    Запрос = request;
+                    Контейнер = container;
                 }
                 |> Running
         }

@@ -11,7 +11,7 @@ open Дрема.Framework
 module Render =
 
     ///Content type used for textual message
-    let [<Literal>] MessageContentType = MediaTypes.Text.Plain
+    let [<Literal>] MessageContentType = МедиаТипы.Text.Plain
 
     ///Functions for writing to the HTTP response object
     module Writing = 

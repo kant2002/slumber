@@ -36,8 +36,8 @@ module ``Common facts`` =
 
                         member this.Headers = 
                             [
-                                ("Content-Type", MediaTypes.Text.Xml);
-                                ("Accept", MediaTypes.Application.Json);
+                                ("Content-Type", МедиаТипы.Text.Xml);
+                                ("Accept", МедиаТипы.Application.Json);
                             ]
                             |> List.toNvc
 
@@ -107,7 +107,7 @@ module ``Common facts`` =
                 let payload = 
                     parsePayload request
 
-                payload.Заголовки |> List.same [ ("Content-Type", MediaTypes.Text.Xml); ("Accept", MediaTypes.Application.Json); ] |> should be True
+                payload.Заголовки |> List.same [ ("Content-Type", МедиаТипы.Text.Xml); ("Accept", МедиаТипы.Application.Json); ] |> should be True
 
             let [<Fact>] ``Body input stream is copied when not empty`` () =
 
@@ -172,7 +172,7 @@ module ``Common facts`` =
 
             let headers =
                 [
-                    ("Content-Type", MediaTypes.Text.Xml);
+                    ("Content-Type", МедиаТипы.Text.Xml);
                     ("Authorization", String.Empty);
                 ]
 
@@ -182,7 +182,7 @@ module ``Common facts`` =
                 let [<Fact>] ``Correct value is returned when header is present`` () =
                     headers
                     |> Заголовки.getValue "Content-Type"
-                    |> should be (Some' MediaTypes.Text.Xml)
+                    |> should be (Some' МедиаТипы.Text.Xml)
 
                 let [<Fact>] ``None is returned when header is not present`` () = 
                     headers
@@ -195,7 +195,7 @@ module ``Common facts`` =
                 let [<Fact>] ``Correct value is returned when the header is present and non-empty`` () =
                     headers
                     |> Заголовки.получитьНепустоеЗначение "Content-Type"
-                    |> should be (Some' MediaTypes.Text.Xml)
+                    |> should be (Some' МедиаТипы.Text.Xml)
 
                 let [<Fact>] ``None is returned when the header is present and empty`` () =
                     headers

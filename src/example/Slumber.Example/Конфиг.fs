@@ -17,8 +17,8 @@ module Config =
                 |> Заголовки.getValue "Authorization"
 
             match username with
-            | Some username' -> Allow (Some { Id = username'; Properties = []; })
-            | _ -> Deny
+            | Some username' -> Разрешено (Some { Id = username'; Properties = []; })
+            | _ -> Запрещено
 
         let createRepository () =
 
@@ -78,8 +78,8 @@ module Config =
                         |> supporting (put (People.updatePerson repository))
                     )
                 |> all (public' options Common.options)
-                |> reading MediaTypes.Application.Json Json.read
-                |> writing MediaTypes.Application.Json Json.write
-                |> reading MediaTypes.Text.Xml Xml.read
-                |> writing MediaTypes.Text.Xml Xml.write
-                |> forwarding MediaTypes.Text.Html MediaTypes.Text.Xml
+                |> reading МедиаТипы.Application.Json Json.read
+                |> writing МедиаТипы.Application.Json Json.write
+                |> reading МедиаТипы.Text.Xml Xml.read
+                |> writing МедиаТипы.Text.Xml Xml.write
+                |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml

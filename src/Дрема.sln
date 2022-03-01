@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Дрема", "app\Slumber\Дрема.fsproj", "{72EA608C-B0F9-4A39-B27F-3461B320235B}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Дрема", "app\Slumber\Дрема.fsproj", "{72EA608C-B0F9-4A39-B27F-3461B320235B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 app", "0 app", "{0873E11B-6F1A-472A-B9CD-C66518F9BF1A}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,17 +22,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 tests", "1 tests", "{D676
 		tests\Traits.fs = tests\Traits.fs
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Slumber.Tests", "tests\Slumber.Tests\Slumber.Tests.fsproj", "{179CA639-9A78-4CC4-A907-0DA32FDA12D2}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Дрема.Тесты", "tests\Slumber.Tests\Дрема.Тесты.fsproj", "{179CA639-9A78-4CC4-A907-0DA32FDA12D2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Дрема.IO", "app\Slumber.IO\Дрема.IO.fsproj", "{642B235C-62CA-4DC4-8A19-232B4FB27372}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Дрема.IO", "app\Slumber.IO\Дрема.IO.fsproj", "{642B235C-62CA-4DC4-8A19-232B4FB27372}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 example", "2 example", "{5EEC7C6A-35C7-42D1-9A3B-110252D86D34}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Дрема.Пример", "example\Slumber.Example\Дрема.Пример.fsproj", "{037B7E04-E4B4-4FA6-98B1-4E88A728B70B}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Дрема.Пример", "example\Slumber.Example\Дрема.Пример.fsproj", "{037B7E04-E4B4-4FA6-98B1-4E88A728B70B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Дрема.Пример.Веб", "example\Slumber.Example.Web\Дрема.Пример.Веб.csproj", "{99B47ED9-D4DC-48EA-847A-E9211208301D}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Slumber.IO.Tests", "tests\Slumber.IO.Tests\Slumber.IO.Tests.fsproj", "{703E4FC6-B282-4F75-B76C-7ADCB973ED14}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Дрема.IO.Тесты", "tests\Slumber.IO.Tests\Дрема.IO.Тесты.fsproj", "{703E4FC6-B282-4F75-B76C-7ADCB973ED14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

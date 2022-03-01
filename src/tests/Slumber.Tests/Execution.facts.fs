@@ -69,7 +69,7 @@ module ``Execution facts`` =
             let reader = 
                 if hasReader then
                     Some {
-                        ContentType = MediaTypes.Text.Xml;
+                        ContentType = МедиаТипы.Text.Xml;
                         Reader = (getReader body);
                         MessageType = typedefof<String>;
                     }
@@ -78,7 +78,7 @@ module ``Execution facts`` =
 
             let writer = 
                 {
-                    ContentType = MediaTypes.Text.Xml;
+                    ContentType = МедиаТипы.Text.Xml;
                     Writer = (fun _ -> []);
                 }
 
@@ -296,7 +296,7 @@ module ``Execution facts`` =
             {
                 Metadata = 
                     {
-                        МетаданныеОперации.Empty
+                        МетаданныеОперации.Пустые
                         with
                             Запрос = 
                                 {
@@ -408,7 +408,7 @@ module ``Execution facts`` =
 
             let writer = 
                 {
-                    ContentType = MediaTypes.Text.Plain;
+                    ContentType = МедиаТипы.Text.Plain;
                     Writer = (fun _ -> raise (InvalidOperationException ()));
                 }
 
@@ -426,7 +426,7 @@ module ``Execution facts`` =
 
             let writer =
                 {
-                    ContentType = MediaTypes.Text.Plain;
+                    ContentType = МедиаТипы.Text.Plain;
                     Writer = (fun _ -> bytes);
                 }
 
@@ -521,7 +521,7 @@ module ``Execution facts`` =
                 match result with
                 | Stopped (Completed resp) ->
                     match resp.ContentType with
-                    | Some contentType -> contentType = MediaTypes.Text.Xml
+                    | Some contentType -> contentType = МедиаТипы.Text.Xml
                     | _ -> false
                 | _ -> false
 

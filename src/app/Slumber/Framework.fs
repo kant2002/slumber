@@ -48,8 +48,8 @@ module Framework =
 
         ///Represents a URL bound endpoint exposing zero or more operations
         type Endpoint = {
-            Name : String;
-            Template : String;
+            Название : String;
+            Шаблон : String;
             Bindings : Binding list;
         }
         with
@@ -57,8 +57,8 @@ module Framework =
             ///The empty endpoint
             static member Empty =
                 {
-                    Name = String.Empty;
-                    Template = String.Empty;
+                    Название = String.Empty;
+                    Шаблон = String.Empty;
                     Bindings = [];
                 }    
 
@@ -66,7 +66,7 @@ module Framework =
         type IOConfig = {
             Readers : (String * MessageIO.Reader) list;
             Writers : (String * MessageIO.Writer) list;
-            ForwardedTypes : (String * String) list;
+            ПеренаправляемыеТипы : (String * String) list;
         }
         with
 
@@ -75,18 +75,18 @@ module Framework =
                 {
                     Readers = [];
                     Writers = [];
-                    ForwardedTypes = [];
+                    ПеренаправляемыеТипы = [];
                 }        
 
         ///Union describing possible results of user authentication
-        type AuthenticationResult = 
-            | Allow of (ДанныеПользователя option)
-            | Deny        
+        type РезультатАвторизации = 
+            | Разрешено of (ДанныеПользователя option)
+            | Запрещено        
 
         ///Represents the security configuration of a container
         type SecurityConfig = {
             DefaultMode : SecurityMode;
-            Authenticate : (Запрос -> AuthenticationResult) option;
+            Authenticate : (Запрос -> РезультатАвторизации) option;
         }
         with
 
@@ -98,7 +98,7 @@ module Framework =
                 }
 
         ///Represents a collection of endpoints and associated configuration data
-        type Container = {
+        type Контейнер = {
             Endpoints : Endpoint list;
             IO : IOConfig;
             BaseUrl : Uri;
@@ -120,12 +120,12 @@ module Framework =
         ///Union describing possible configuration modes
         type ConfigurationMode = 
             | Implicit
-            | Explicit of Container
-            | Mixed of (Container -> Container)
+            | Explicit of Контейнер
+            | Mixed of (Контейнер -> Контейнер)
 
         ///Defines a class which can describe a container for a given base URL
         type IContainerDescription = 
-            abstract member Describe : Uri -> Container
+            abstract member Describe : Uri -> Контейнер
 
         ///Contains functions for working with containers
         module Containers = 
@@ -170,14 +170,14 @@ module Framework =
 
             ///True if a type is forwarded
             let isForwarded contentType container = 
-                container.IO.ForwardedTypes
+                container.IO.ПеренаправляемыеТипы
                 |> List.exists (fst >> String.same contentType)
 
             ///Applies forwarding to a content type, returning the fowrarded type if one is configured
             let applyForwarding contentType container = 
 
                 let forwardedType = 
-                    container.IO.ForwardedTypes
+                    container.IO.ПеренаправляемыеТипы
                     |> List.tryPick (fun (from, to') ->
                             if (String.same from contentType) then
                                 Some to'
@@ -197,7 +197,7 @@ module Framework =
             let tryGetEndpointByName name container = 
                 container.Endpoints
                 |> List.tryPick (fun endpoint ->
-                        if (String.same endpoint.Name name) then
+                        if (String.same endpoint.Название name) then
                             Some endpoint
                         else
                             None
@@ -208,11 +208,11 @@ module Framework =
 
             ///Gets the name of a given endpoint
             let getName endpoint = 
-                endpoint.Name
+                endpoint.Название
 
             ///Gets an endpoint's template
             let getTemplate endpoint =
-                endpoint.Template
+                endpoint.Шаблон
 
             ///Gets an endpoint's binding collection
             let getBindings endpoint =
@@ -353,7 +353,7 @@ module Framework =
         ///Instantiates and queries the first container description that can be found in the /bin/ folder and caches the result
         let get = 
 
-            let configs = ConcurrentDictionary<Uri, Container> ()
+            let configs = ConcurrentDictionary<Uri, Контейнер> ()
 
             fun (baseUrl : Uri) -> 
                 configs.GetOrAdd (

@@ -14,13 +14,17 @@ module ``Discovery facts`` =
     open Framework
     open Setup.Bindings
 
+    let должно = should
+    let быть = be
+    let равняться = equal
+
     let teapot (_ : obj option) = 
         OperationResult.StatusOnly 418 //Teapot
 
     let endpoint = 
         {
-            Name = "Dummy";
-            Template = "/people/{personCode}";
+            Название = "Dummy";
+            Шаблон = "/people/{personCode}";
             Bindings = [ get teapot ]; 
         }
 
@@ -29,12 +33,12 @@ module ``Discovery facts`` =
     [<AutoOpen>] 
     module Helpers = 
         
-        let getArgs (relativeUrl : String) =     
+        let получитьАрг (relativeUrl : String) =     
         
-            let reader _ _ = 
+            let читатель _ _ = 
                 None
 
-            let writer _ = 
+            let писатель _ = 
                 []
 
             let relativeUrl' = 
@@ -47,7 +51,7 @@ module ``Discovery facts`` =
                 Uri ("http://localhost:8080/api/", UriKind.Absolute)
 
             {
-                Request = 
+                Запрос = 
                     {
                         Запрос.Empty 
                         with
@@ -67,48 +71,48 @@ module ``Discovery facts`` =
                                         Тело = (Some (new MemoryStream () :> Stream));
                                 }
                     } ;
-                Container =
+                Контейнер =
                     {
-                        Container.Empty
+                        Контейнер.Empty
                         with
                             Endpoints = [ endpoint; ];
                             IO = 
                                 {
                                     IOConfig.Empty
                                     with
-                                        Readers = [ (MediaTypes.Text.Xml, reader); (MediaTypes.Application.Json, reader) ];
-                                        Writers = [ (MediaTypes.Text.Xml, writer); (MediaTypes.Application.Json, writer) ];
+                                        Readers = [ (МедиаТипы.Text.Xml, читатель); (МедиаТипы.Application.Json, читатель) ];
+                                        Writers = [ (МедиаТипы.Text.Xml, писатель); (МедиаТипы.Application.Json, писатель) ];
                                 }
                             BaseUrl = baseUrl;
                     }
             }
 
-        let addHeader name value (args : DiscoveryArgs) = 
+        let добавитьЗаголовок name value (args : DiscoveryArgs) = 
 
             let payload'  = 
-                { args.Request.Payload with Заголовки = (name, value) :: args.Request.Payload.Заголовки; }
+                { args.Запрос.Payload with Заголовки = (name, value) :: args.Запрос.Payload.Заголовки; }
 
-            { args with Request = { args.Request with Payload = payload'; }; }
+            { args with Запрос = { args.Запрос with Payload = payload'; }; }
 
         let addForwardedType from to' args = 
 
             let container' =
                 {
-                    args.Container
+                    args.Контейнер
                     with
                         IO = 
                             {
-                                args.Container.IO
+                                args.Контейнер.IO
                                 with
-                                    ForwardedTypes = [ (from, to'); ];
+                                    ПеренаправляемыеТипы = [ (from, to'); ];
                             }
                 }
 
-            { args with Container = container'; }
+            { args with Контейнер = container'; }
       
         let makePrivate auth args = 
-            let security = { args.Container.Security with DefaultMode = Private; Authenticate = (Some auth); }
-            in  { args with Container = { args.Container with Security = security; }; }
+            let security = { args.Контейнер.Security with DefaultMode = Private; Authenticate = (Some auth); }
+            in  { args with Контейнер = { args.Контейнер with Security = security; }; }
 
     module ``Matching facts`` = 
 
@@ -130,7 +134,7 @@ module ``Discovery facts`` =
             let ``URIs with a trailing slash are not changed`` url =
                 normaliseUrl' url
                 |> string
-                |> should equal url
+                |> должно равняться url
 
             [<Theory>]
             [<InlineData ("http://localhost", "http://localhost/")>]
@@ -140,7 +144,7 @@ module ``Discovery facts`` =
             let ``A trailing slash is added after the path if not present`` url expected =
                 normaliseUrl' url
                 |> string
-                |> should equal expected
+                |> должно равняться expected
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncMatchEndpoint function`` = 
@@ -157,10 +161,10 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 "/addresses"
-                |> getArgs
+                |> получитьАрг
                 |> matchEndpoint
                 |> isNotFound
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Matching URL returns success`` () = 
 
@@ -170,10 +174,10 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> matchEndpoint
                 |> isSuccess
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Trailing slashes are ignored`` () =
 
@@ -183,23 +187,23 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 "/people/12345/"
-                |> getArgs
+                |> получитьАрг
                 |> matchEndpoint
                 |> isSuccess
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Successful match includes correct endpoint`` () =
 
                 let getTemplate outcome = 
                     match outcome with
-                    | Success (endpoint, _) -> endpoint.Template
+                    | Success (endpoint, _) -> endpoint.Шаблон
                     | _ -> String.Empty
 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> matchEndpoint
                 |> getTemplate
-                |> should equal "/people/{personCode}"
+                |> должно равняться "/people/{personCode}"
 
             let [<Fact>] ``Successful match includes matched URL parameters`` () =
                 
@@ -209,18 +213,18 @@ module ``Discovery facts`` =
                     | _ -> []
 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> matchEndpoint
                 |> getParameters
                 |> List.same [ ("PERSONCODE", "12345") ] //Note UriTemplate converts placeholders to upper case. Potentially annoying.
-                |> should be True
+                |> должно быть True
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncMatchBinding function`` =
 
             let matchBinding endpoint = 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> asyncMatchBinding endpoint 
                 |> Async.RunSynchronously
 
@@ -237,7 +241,7 @@ module ``Discovery facts`` =
                 (endpoint', [])
                 |> matchBinding
                 |> isNotSupported
-                |> should be True
+                |> должно быть True
                 
             let [<Fact>] ``Registered binding returns success`` () =
 
@@ -249,7 +253,7 @@ module ``Discovery facts`` =
                 (endpoint, [])
                 |> matchBinding
                 |> isSuccess
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Success includes URL parameters`` () =
                 
@@ -265,7 +269,7 @@ module ``Discovery facts`` =
                 |> matchBinding
                 |> getParameters
                 |> List.same parameters
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Success includes operation`` () =
                 
@@ -279,7 +283,7 @@ module ``Discovery facts`` =
                         {
                             Metadata = 
                                 {
-                                    МетаданныеОперации.Empty
+                                    МетаданныеОперации.Пустые
                                     with
                                         Запрос = 
                                             {
@@ -316,19 +320,19 @@ module ``Discovery facts`` =
                 (endpoint, [])
                 |> matchBinding
                 |> isStringMessage
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Success includes endpoint name`` () =
 
                 let hasCorrectName result = 
                     match result with
-                    | Success (result : MatchingResult) -> result.EndpointName = endpoint.Name
+                    | Success (result : MatchingResult) -> result.EndpointName = endpoint.Название
                     | _ -> false
 
                 (endpoint, [])
                 |> matchBinding
                 |> hasCorrectName
-                |> should be True                
+                |> должно быть True                
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncGetMatchingResult function`` =
@@ -345,10 +349,10 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 "/addresses"
-                |> getArgs
+                |> получитьАрг
                 |> getMatchingResult
                 |> isNotFound
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``No registered operation returns HTTP 405`` () =
                 
@@ -358,14 +362,14 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 let changeVerb (args : DiscoveryArgs) = 
-                    { args with Request = { args.Request with Verb = "POST"; }; }
+                    { args with Запрос = { args.Запрос with Verb = "POST"; }; }
 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> changeVerb
                 |> getMatchingResult
                 |> isNotSupported
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Registered URL and binding returns success`` () =
 
@@ -375,10 +379,10 @@ module ``Discovery facts`` =
                     | _ -> false
 
                 "/people/12345"
-                |> getArgs
+                |> получитьАрг
                 |> getMatchingResult
                 |> isSuccess
-                |> should be True
+                |> должно быть True
 
     module ``Security facts`` =
 
@@ -399,12 +403,12 @@ module ``Discovery facts`` =
                     |> Async.RunSynchronously
 
                 let setAuth f args = 
-                    let security = { args.Container.Security with Authenticate = (Some f); }
-                    in { args with Container = { args.Container with Security = security; }; }
+                    let security = { args.Контейнер.Security with Authenticate = (Some f); }
+                    in { args with Контейнер = { args.Контейнер with Security = security; }; }
 
                 let setMode mode args = 
-                    let security = { args.Container.Security with DefaultMode = mode; } 
-                    in { args with Container = { args.Container with Security = security; }; }
+                    let security = { args.Контейнер.Security with DefaultMode = mode; } 
+                    in { args with Контейнер = { args.Контейнер with Security = security; }; }
 
                 let getResult mode = 
                     {
@@ -428,9 +432,9 @@ module ``Discovery facts`` =
 
                     let auth _ = 
                         _called := true
-                        Deny
+                        Запрещено
 
-                    getArgs "/12345"
+                    получитьАрг "/12345"
                     |> setAuth auth
                     |> setMode defaultMode
                     |> authenticateRequest result
@@ -478,76 +482,76 @@ module ``Discovery facts`` =
                     getResult (Some SecurityMode.Private)
 
                 let auth _ =
-                    Allow (Some { Id = "admin"; Properties = []; })
+                    Разрешено (Some { Id = "admin"; Properties = []; })
 
                 let isCorrect (data : ДанныеПользователя option) = 
                     match data with 
                     | Some user -> user.Id = "admin"
                     | _ -> false
 
-                getArgs "/1235"
+                получитьАрг "/1235"
                 |> setAuth auth
                 |> authenticateRequest result
                 |> getUserData
                 |> isCorrect
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Nothing is returned for private binding when no authentication function is set`` () =
                 
                 let result = getResult (Some SecurityMode.Private)
 
-                getArgs "/12345"
+                получитьАрг "/12345"
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Nothing is returned for public bindings`` () =
                 
                 let result = getResult (Some SecurityMode.Public)
-                let auth _ = Allow (Some { Id = "admin"; Properties = []; })
+                let auth _ = Разрешено (Some { Id = "admin"; Properties = []; })
 
-                getArgs "/1235"
+                получитьАрг "/1235"
                 |> setAuth auth
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Nothing is returned for inherited bindings when mode is public`` () =
                 
                 let result = getResult None
-                let auth _ = Allow (Some { Id = "admin"; Properties = []; })
+                let auth _ = Разрешено (Some { Id = "admin"; Properties = []; })
 
-                getArgs "/12345"
+                получитьАрг "/12345"
                 |> setAuth auth
                 |> setMode SecurityMode.Public
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``Nothing is returned for inherited bindings when mode is private but no authentication function is set`` () = 
                 
                 let result = getResult None
 
-                getArgs "/12345"
+                получитьАрг "/12345"
                 |> setMode SecurityMode.Private
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
-                |> should be True
+                |> должно быть True
 
             let [<Fact>] ``HTTP 401 is returend when authentication is not successful`` () =
                 
                 let result = getResult (Some SecurityMode.Private)
-                let auth _ = Deny
+                let auth _ = Запрещено
 
-                getArgs "/12345"
+                получитьАрг "/12345"
                 |> setAuth auth
                 |> authenticateRequest result
                 |> getStatusCode
-                |> should equal StatusCodes.Unauthorised
+                |> должно равняться StatusCodes.Unauthorised
 
 
     module ``Negotiation facts`` =
@@ -559,111 +563,111 @@ module ``Discovery facts`` =
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncGetReader function`` =
 
-            let getRequestType = 
+            let получитьТипЗапроса = 
 
-                let getContentType result = 
-                    match result with
-                    | Some (contentType, _) -> Some contentType
+                let получитьТипКонтента результат = 
+                    match результат with
+                    | Some (типКонтента, _) -> Some типКонтента
                     | _ -> None
 
                 asyncGetReader
                 >> Async.RunSynchronously
-                >> getContentType
+                >> получитьТипКонтента
 
             let [<Fact>] ``Specified content type is selected if supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Content-Type" MediaTypes.Text.Xml
-                |> getRequestType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Content-Type" МедиаТипы.Text.Xml
+                |> получитьТипЗапроса
+                |> should be (Some' МедиаТипы.Text.Xml)
 
             let [<Fact>] ``Nothing is selected if content type is not supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Content-Type" "application/vendor"
-                |> getRequestType
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Content-Type" "application/vendor"
+                |> получитьТипЗапроса
                 |> should be None'<String>
 
             let [<Fact>] ``Default content type is selected if none specified`` () =
-                getArgs "/people/12345"
-                |> getRequestType
+                получитьАрг "/people/12345"
+                |> получитьТипЗапроса
                 |> should be (Some' DefaultMediaType)
 
             let [<Fact>] ``Target content type is used if specified content type is forwarded`` () =
-                getArgs "/people/12345"
-                |> addHeader "Content-Type" MediaTypes.Text.Html
-                |> addForwardedType MediaTypes.Text.Html MediaTypes.Text.Xml
-                |> getRequestType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Content-Type" МедиаТипы.Text.Html
+                |> addForwardedType МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> получитьТипЗапроса
+                |> should be (Some' МедиаТипы.Text.Xml)
 
             let [<Fact>] ``Target content type is used in preference to specified content type even if supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Content-Type" MediaTypes.Text.Xml
-                |> addForwardedType MediaTypes.Text.Xml MediaTypes.Application.Json
-                |> getRequestType
-                |> should be (Some' MediaTypes.Application.Json)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Content-Type" МедиаТипы.Text.Xml
+                |> addForwardedType МедиаТипы.Text.Xml МедиаТипы.Application.Json
+                |> получитьТипЗапроса
+                |> should be (Some' МедиаТипы.Application.Json)
                 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``asyncGetWriter function`` =
 
-            let getResponseType =
+            let получитьТипОтвета =
 
-                let getContentType result = 
+                let получитьТипКонтента result = 
                     match result with
                     | Some (contentType, _) -> Some contentType
                     | _ -> None
 
                 asyncGetWriter
                 >> Async.RunSynchronously
-                >> getContentType
+                >> получитьТипКонтента
 
             let [<Fact>] ``Specified content type is selected if supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" MediaTypes.Text.Xml
-                |> getResponseType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" МедиаТипы.Text.Xml
+                |> получитьТипОтвета
+                |> should be (Some' МедиаТипы.Text.Xml)
 
             let [<Fact>] ``First supported content type is selected if multiple types are specified`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" "text/html, text/xml, application/json"
-                |> getResponseType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" "text/html, text/xml, application/json"
+                |> получитьТипОтвета
+                |> should be (Some' МедиаТипы.Text.Xml)
 
             let [<Fact>] ``Nothing is selected if content type is not supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" MediaTypes.Text.Html
-                |> getResponseType
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" МедиаТипы.Text.Html
+                |> получитьТипОтвета
                 |> should be None'<String>
 
             let [<Fact>] ``Default content type is selected if none specified`` () =
-                getArgs "/people/12345"
-                |> getResponseType
+                получитьАрг "/people/12345"
+                |> получитьТипОтвета
                 |> should be (Some' DefaultMediaType)
 
             let [<Fact>] ``Default content type is selected if */* is specified`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" "*/*"
-                |> getResponseType
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" "*/*"
+                |> получитьТипОтвета
                 |> should be (Some' DefaultMediaType)
 
             let [<Fact>] ``Target content type is used if specified content type is forwarded`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" MediaTypes.Text.Html
-                |> addForwardedType MediaTypes.Text.Html MediaTypes.Text.Xml
-                |> getResponseType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" МедиаТипы.Text.Html
+                |> addForwardedType МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> получитьТипОтвета
+                |> should be (Some' МедиаТипы.Text.Xml)
 
             let [<Fact>] ``Target content type is used in preference to specified content type even if supported`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" MediaTypes.Text.Xml
-                |> addForwardedType MediaTypes.Text.Xml MediaTypes.Application.Json
-                |> getResponseType
-                |> should be (Some' MediaTypes.Application.Json)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" МедиаТипы.Text.Xml
+                |> addForwardedType МедиаТипы.Text.Xml МедиаТипы.Application.Json
+                |> получитьТипОтвета
+                |> should be (Some' МедиаТипы.Application.Json)
 
             let [<Fact>] ``Content type forwarding is applied when multiple content types are specified`` () =
-                getArgs "/people/12345"
-                |> addHeader "Accept" "text/html, text/plain, application/json"
-                |> addForwardedType MediaTypes.Text.Html MediaTypes.Text.Xml
-                |> getResponseType
-                |> should be (Some' MediaTypes.Text.Xml)
+                получитьАрг "/people/12345"
+                |> добавитьЗаголовок "Accept" "text/html, text/plain, application/json"
+                |> addForwardedType МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> получитьТипОтвета
+                |> should be (Some' МедиаТипы.Text.Xml)
 
     [<Trait (Traits.Names.Module, ModuleName)>]
     module ``run function`` = 
@@ -684,11 +688,11 @@ module ``Discovery facts`` =
                     | _ -> false
                 | _ -> false
 
-            getArgs "/people/12345"
-            |> addHeader "Content-Type" MediaTypes.Text.Html
+            получитьАрг "/people/12345"
+            |> добавитьЗаголовок "Content-Type" МедиаТипы.Text.Html
             |> run
             |> isNotSupported
-            |> should be True
+            |> должно быть True
 
         let [<Fact>] ``Bindings without messages return no reader information`` () =
 
@@ -703,15 +707,15 @@ module ``Discovery facts`` =
                     get (fun () -> "Hello, World")
 
                 let container = 
-                    { args.Container with Endpoints = [ { endpoint with Bindings = [ binding; ]; } ]; }
+                    { args.Контейнер with Endpoints = [ { endpoint with Bindings = [ binding; ]; } ]; }
 
-                { args with Container = container; }
+                { args with Контейнер = container; }
 
-            getArgs "/people/12345"
+            получитьАрг "/people/12345"
             |> setBinding
             |> run
             |> hasNoReader
-            |> should be True
+            |> должно быть True
 
         let [<Fact>] ``Bindings with messages return correct reader information`` () =
             
@@ -725,10 +729,10 @@ module ``Discovery facts`` =
                     | _ -> false
                 | _ -> false
 
-            getArgs "/people/12345"
+            получитьАрг "/people/12345"
             |> run
             |> isReaderCorrect
-            |> should be True
+            |> должно быть True
 
         let [<Fact>] ``Correct writer information is returned`` () =
             
@@ -740,10 +744,10 @@ module ``Discovery facts`` =
                     | _ -> false
                 | _ -> false
 
-            getArgs "/people/12345"
+            получитьАрг "/people/12345"
             |> run
             |> isWriterCorrect
-            |> should be True
+            |> должно быть True
 
         let [<Fact>] ``Unauthorised request returns HTTP 401`` () =
 
@@ -758,11 +762,11 @@ module ``Discovery facts`` =
                     | _ -> false
                 | _ -> false
 
-            getArgs "/people/12345"
-            |> makePrivate (fun _ -> Deny)
+            получитьАрг "/people/12345"
+            |> makePrivate (fun _ -> Запрещено)
             |> run
             |> isUnauthorised'
-            |> should be True
+            |> должно быть True
 
         let [<Fact>] ``User details are returned if provided by authentication function`` () =
             
@@ -774,9 +778,9 @@ module ``Discovery facts`` =
                     | _ -> false
                 | _ -> false
 
-            getArgs "/people/12345"
-            |> makePrivate (fun _ -> Allow (Some { Id = "user.name"; Properties = []; }))
+            получитьАрг "/people/12345"
+            |> makePrivate (fun _ -> Разрешено (Some { Id = "user.name"; Properties = []; }))
             |> run
             |> hasUserDetails
-            |> should be True
+            |> должно быть True
 

@@ -45,7 +45,7 @@ module Execution =
     ///Represents the arguments used to run the execution phase
     type ExecutionArgs = {
         Request : Запрос;
-        Container : Container;
+        Container : Контейнер;
         Reader : ReaderInfo option;
         Writer : WriterInfo option;
         Target : TargetInfo;
@@ -57,7 +57,7 @@ module Execution =
         static member Empty = 
             {
                 Request = Запрос.Empty;
-                Container = Container.Empty;
+                Container = Контейнер.Empty;
                 Reader = None;
                 Writer = None;
                 Target = TargetInfo.Empty;

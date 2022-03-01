@@ -95,7 +95,7 @@ module Common =
             let [<Literal>] Patch = "PATCH"
 
         ///Contains constants for common media types
-        module MediaTypes = 
+        module МедиаТипы = 
 
             [<RequireQualifiedAccess>]
             module Text = 
@@ -354,7 +354,7 @@ module Common =
                 | _ -> None
 
             ///Empty operation metadata
-            static member Empty = 
+            static member Пустые = 
                 {
                     ContainerUrl = Uri (DefaultUrl, UriKind.Absolute);
                     EndpointName = String.Empty;
@@ -440,7 +440,7 @@ module Common =
             ///The empty context
             static member Empty = 
                 {
-                    Metadata = МетаданныеОперации.Empty;
+                    Metadata = МетаданныеОперации.Пустые;
                     Message = None;
                 }  
 
