@@ -22,7 +22,7 @@
     <Compile Include="Выполнение.fs" />
     <Compile Include="Обнаружение.fs" />
     <Compile Include="Bootstrap.fs" />
-    <Compile Include="Pipeline.fs" />
+    <Compile Include="Конвейер.fs" />
     <Compile Include="Обработчик.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
