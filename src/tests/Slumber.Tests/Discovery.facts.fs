@@ -19,13 +19,13 @@ module ``Discovery facts`` =
     let равняться = equal
 
     let teapot (_ : obj option) = 
-        OperationResult.StatusOnly 418 //Teapot
+        РезультатОперации.ТолькоСтатус 418 //Teapot
 
     let endpoint = 
         {
             Название = "Dummy";
             Шаблон = "/people/{personCode}";
-            Bindings = [ get teapot ]; 
+            Привязки = [ get teapot ]; 
         }
 
     let [<Literal>] ModuleName = "Discovery"
@@ -53,35 +53,35 @@ module ``Discovery facts`` =
             {
                 Запрос = 
                     {
-                        Запрос.Empty 
+                        Запрос.Пустой 
                         with
                             Url = 
                                 {
-                                    Urls.Empty
+                                    Urls.Пустые
                                     with
                                         Raw = Uri (baseUrl, relativeUrl');
-                                        Path = relativeUrl;
+                                        Путь = relativeUrl;
                                         BaseUrl = baseUrl;
                                 };
                             Verb = "GET";
                             Payload = 
                                 {
-                                    Payload.Empty
+                                    Payload.Пустой
                                     with
                                         Тело = (Some (new MemoryStream () :> Stream));
                                 }
                     } ;
                 Контейнер =
                     {
-                        Контейнер.Empty
+                        Контейнер.Пустой
                         with
                             Endpoints = [ endpoint; ];
-                            IO = 
+                            ВВ = 
                                 {
-                                    IOConfig.Empty
+                                    КонфигВВ.Пустой
                                     with
-                                        Readers = [ (МедиаТипы.Text.Xml, читатель); (МедиаТипы.Application.Json, читатель) ];
-                                        Writers = [ (МедиаТипы.Text.Xml, писатель); (МедиаТипы.Application.Json, писатель) ];
+                                        Читатели = [ (МедиаТипы.Text.Xml, читатель); (МедиаТипы.Application.Json, читатель) ];
+                                        Писатели = [ (МедиаТипы.Text.Xml, писатель); (МедиаТипы.Application.Json, писатель) ];
                                 }
                             BaseUrl = baseUrl;
                     }
@@ -100,9 +100,9 @@ module ``Discovery facts`` =
                 {
                     args.Контейнер
                     with
-                        IO = 
+                        ВВ = 
                             {
-                                args.Контейнер.IO
+                                args.Контейнер.ВВ
                                 with
                                     ПеренаправляемыеТипы = [ (from, to'); ];
                             }
@@ -111,13 +111,13 @@ module ``Discovery facts`` =
             { args with Контейнер = container'; }
       
         let makePrivate auth args = 
-            let security = { args.Контейнер.Security with DefaultMode = Private; Authenticate = (Some auth); }
+            let security = { args.Контейнер.Security with DefaultMode = Private; Авторизовать = (Some auth); }
             in  { args with Контейнер = { args.Контейнер with Security = security; }; }
 
     module ``Matching facts`` = 
 
         open Discovery.Matching
-        open Attempt
+        open Попытка
 
         let [<Literal>] ModuleName = "Discovery.Matching"
 
@@ -157,7 +157,7 @@ module ``Discovery facts`` =
 
                 let isNotFound outcome = 
                     match outcome with
-                    | Failure statusCode -> statusCode = StatusCodes.NotFound
+                    | Провал statusCode -> statusCode = StatusCodes.NotFound
                     | _ -> false
 
                 "/addresses"
@@ -170,7 +170,7 @@ module ``Discovery facts`` =
 
                 let isSuccess outcome = 
                     match outcome with
-                    | Success _ -> true
+                    | Успех _ -> true
                     | _ -> false
 
                 "/people/12345"
@@ -183,7 +183,7 @@ module ``Discovery facts`` =
 
                 let isSuccess outcome = 
                     match outcome with
-                    | Success _ -> true
+                    | Успех _ -> true
                     | _ -> false
 
                 "/people/12345/"
@@ -196,7 +196,7 @@ module ``Discovery facts`` =
 
                 let getTemplate outcome = 
                     match outcome with
-                    | Success (endpoint, _) -> endpoint.Шаблон
+                    | Успех (endpoint, _) -> endpoint.Шаблон
                     | _ -> String.Empty
 
                 "/people/12345"
@@ -209,7 +209,7 @@ module ``Discovery facts`` =
                 
                 let getParameters outcome = 
                     match outcome with
-                    | Success (_, parameters) -> parameters
+                    | Успех (_, parameters) -> parameters
                     | _ -> []
 
                 "/people/12345"
@@ -232,11 +232,11 @@ module ``Discovery facts`` =
 
                 let isNotSupported outcome = 
                     match outcome with
-                    | Failure statusCode -> statusCode = StatusCodes.MethodNotAllowed
+                    | Провал statusCode -> statusCode = StatusCodes.MethodNotAllowed
                     | _ -> false
 
                 let endpoint' = 
-                    { endpoint with Bindings = [ post teapot ] }
+                    { endpoint with Привязки = [ post teapot ] }
 
                 (endpoint', [])
                 |> matchBinding
@@ -247,7 +247,7 @@ module ``Discovery facts`` =
 
                 let isSuccess outcome = 
                     match outcome with
-                    | Success _ -> true
+                    | Успех _ -> true
                     | _ -> false
                 
                 (endpoint, [])
@@ -259,7 +259,7 @@ module ``Discovery facts`` =
                 
                 let getParameters outcome = 
                     match outcome with
-                    | Success (result : MatchingResult) -> result.Parameters
+                    | Успех (result : MatchingResult) -> result.Parameters
                     | _ -> []
 
                 let parameters = 
@@ -275,46 +275,46 @@ module ``Discovery facts`` =
                 
                 let executeOp outcome = 
                     
-                    let (context : OperationContext) = 
+                    let (context : КонтекстОперации) = 
 
                         let baseUrl = 
                             Uri ("http://localhost/api", UriKind.Absolute)
 
                         {
-                            Metadata = 
+                            Метаданные = 
                                 {
                                     МетаданныеОперации.Пустые
                                     with
                                         Запрос = 
                                             {
-                                                Запрос.Empty
+                                                Запрос.Пустой
                                                 with
                                                     Url = 
                                                         {
                                                             Raw = Uri (baseUrl, "people/12345");
-                                                            Path = "/people/12345";
-                                                            Query = [];
+                                                            Путь = "/people/12345";
+                                                            Запрос = [];
                                                             BaseUrl = baseUrl;
                                                         };                                                    
                                             };
                                 };
-                            Message = None;
+                            Сообщение = None;
                         }
 
                     match outcome with
-                    | Success result -> Some (result.Binding.Operation context)
+                    | Успех result -> Some (result.Binding.Операция context)
                     | _ -> None
 
                 (endpoint, [])
                 |> matchBinding
                 |> executeOp
-                |> should be (Some' ({ StatusCode = Some 418; Resource = None; Headers = []; }))
+                |> should be (Some' ({ КодСтатуса = Some 418; Ресурс = None; Заголовки = []; }))
 
             let [<Fact>] ``Success includes message type`` () =
 
                 let isStringMessage result = 
                     match result with
-                    | Success result -> result.Binding.MessageType = (Some typedefof<obj>)
+                    | Успех result -> result.Binding.ТипСообщения = (Some typedefof<obj>)
                     | _ -> false
 
                 (endpoint, [])
@@ -326,7 +326,7 @@ module ``Discovery facts`` =
 
                 let hasCorrectName result = 
                     match result with
-                    | Success (result : MatchingResult) -> result.EndpointName = endpoint.Название
+                    | Успех (result : MatchingResult) -> result.EndpointName = endpoint.Название
                     | _ -> false
 
                 (endpoint, [])
@@ -345,7 +345,7 @@ module ``Discovery facts`` =
                 
                 let isNotFound outcome = 
                     match outcome with
-                    | Failure statusCode -> statusCode = 404
+                    | Провал statusCode -> statusCode = 404
                     | _ -> false
 
                 "/addresses"
@@ -358,7 +358,7 @@ module ``Discovery facts`` =
                 
                 let isNotSupported outcome = 
                     match outcome with
-                    | Failure statusCode -> statusCode = 405
+                    | Провал statusCode -> statusCode = 405
                     | _ -> false
 
                 let changeVerb (args : DiscoveryArgs) = 
@@ -375,7 +375,7 @@ module ``Discovery facts`` =
 
                 let isSuccess outcome = 
                     match outcome with
-                    | Success _ -> true
+                    | Успех _ -> true
                     | _ -> false
 
                 "/people/12345"
@@ -403,7 +403,7 @@ module ``Discovery facts`` =
                     |> Async.RunSynchronously
 
                 let setAuth f args = 
-                    let security = { args.Контейнер.Security with Authenticate = (Some f); }
+                    let security = { args.Контейнер.Security with Авторизовать = (Some f); }
                     in { args with Контейнер = { args.Контейнер with Security = security; }; }
 
                 let setMode mode args = 
@@ -417,9 +417,9 @@ module ``Discovery facts`` =
                         Binding = 
                             {
                                 Verb = "VERB";
-                                SecurityMode = mode;
-                                Operation = (fun _ -> OperationResult.Empty);
-                                MessageType = None;
+                                РежимБезопасности = mode;
+                                Операция = (fun _ -> РезультатОперации.Пустой);
+                                ТипСообщения = None;
                             };
                     }
 
@@ -444,45 +444,45 @@ module ``Discovery facts`` =
 
                 let getUserData outcome = 
                     match outcome with
-                    | Success user -> user
+                    | Успех user -> user
                     | _ -> invalidOp "Unexpected outcome"
 
                 let getStatusCode outcome = 
                     match outcome with
-                    | Failure statusCode -> statusCode
+                    | Провал statusCode -> statusCode
                     | _ -> invalidOp "Unexpected outcome"
 
             let [<Fact>] ``Authentication function called for private bindings`` () =
                 assertCalled
-                <| (Some SecurityMode.Private)
-                <| SecurityMode.Private
+                <| (Some РежимБезопасности.Private)
+                <| РежимБезопасности.Private
                 <| true
 
             let [<Fact>] ``Authentication function not called for public bindings`` () =
                 assertCalled
-                <| (Some SecurityMode.Public)
-                <| SecurityMode.Private
+                <| (Some РежимБезопасности.Public)
+                <| РежимБезопасности.Private
                 <| false
 
             let [<Fact>] ``Authenticaiton function called for inherited bindings if mode is private`` () =
                 assertCalled
                 <| None
-                <| SecurityMode.Private
+                <| РежимБезопасности.Private
                 <| true
 
             let [<Fact>] ``Authentication function not called for inherited bindings if mode is public`` () =
                 assertCalled
                 <| None
-                <| SecurityMode.Public
+                <| РежимБезопасности.Public
                 <| false
 
             let [<Fact>] ``Correct user data is returned when authentication is successful`` () =
                 
                 let result = 
-                    getResult (Some SecurityMode.Private)
+                    getResult (Some РежимБезопасности.Private)
 
                 let auth _ =
-                    Разрешено (Some { Id = "admin"; Properties = []; })
+                    Разрешено (Some { Id = "admin"; Свойства = []; })
 
                 let isCorrect (data : ДанныеПользователя option) = 
                     match data with 
@@ -498,7 +498,7 @@ module ``Discovery facts`` =
 
             let [<Fact>] ``Nothing is returned for private binding when no authentication function is set`` () =
                 
-                let result = getResult (Some SecurityMode.Private)
+                let result = getResult (Some РежимБезопасности.Private)
 
                 получитьАрг "/12345"
                 |> authenticateRequest result
@@ -508,8 +508,8 @@ module ``Discovery facts`` =
 
             let [<Fact>] ``Nothing is returned for public bindings`` () =
                 
-                let result = getResult (Some SecurityMode.Public)
-                let auth _ = Разрешено (Some { Id = "admin"; Properties = []; })
+                let result = getResult (Some РежимБезопасности.Public)
+                let auth _ = Разрешено (Some { Id = "admin"; Свойства = []; })
 
                 получитьАрг "/1235"
                 |> setAuth auth
@@ -521,11 +521,11 @@ module ``Discovery facts`` =
             let [<Fact>] ``Nothing is returned for inherited bindings when mode is public`` () =
                 
                 let result = getResult None
-                let auth _ = Разрешено (Some { Id = "admin"; Properties = []; })
+                let auth _ = Разрешено (Some { Id = "admin"; Свойства = []; })
 
                 получитьАрг "/12345"
                 |> setAuth auth
-                |> setMode SecurityMode.Public
+                |> setMode РежимБезопасности.Public
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
@@ -536,7 +536,7 @@ module ``Discovery facts`` =
                 let result = getResult None
 
                 получитьАрг "/12345"
-                |> setMode SecurityMode.Private
+                |> setMode РежимБезопасности.Private
                 |> authenticateRequest result
                 |> getUserData
                 |> Option.isNone
@@ -544,7 +544,7 @@ module ``Discovery facts`` =
 
             let [<Fact>] ``HTTP 401 is returend when authentication is not successful`` () =
                 
-                let result = getResult (Some SecurityMode.Private)
+                let result = getResult (Some РежимБезопасности.Private)
                 let auth _ = Запрещено
 
                 получитьАрг "/12345"
@@ -682,7 +682,7 @@ module ``Discovery facts`` =
                 | Stopped stopType -> 
                     match stopType with
                     | Completed response ->
-                        match response.ResponseType with
+                        match response.ТипОтвета with
                         | StatusCode statusCode -> statusCode = StatusCodes.ContentTypeNotSupported
                         | _ -> false
                     | _ -> false
@@ -707,7 +707,7 @@ module ``Discovery facts`` =
                     get (fun () -> "Hello, World")
 
                 let container = 
-                    { args.Контейнер with Endpoints = [ { endpoint with Bindings = [ binding; ]; } ]; }
+                    { args.Контейнер with Endpoints = [ { endpoint with Привязки = [ binding; ]; } ]; }
 
                 { args with Контейнер = container; }
 
@@ -756,7 +756,7 @@ module ``Discovery facts`` =
                 | Stopped stopType ->
                     match stopType with
                     | Completed response ->
-                        match response.ResponseType with
+                        match response.ТипОтвета with
                         | StatusCode statusCode -> statusCode = StatusCodes.Unauthorised
                         | _ -> false
                     | _ -> false
@@ -779,7 +779,7 @@ module ``Discovery facts`` =
                 | _ -> false
 
             получитьАрг "/people/12345"
-            |> makePrivate (fun _ -> Разрешено (Some { Id = "user.name"; Properties = []; }))
+            |> makePrivate (fun _ -> Разрешено (Some { Id = "user.name"; Свойства = []; }))
             |> run
             |> hasUserDetails
             |> должно быть True

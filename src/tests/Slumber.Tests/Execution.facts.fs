@@ -33,20 +33,20 @@ module ``Execution facts`` =
                 Uri ("http://localhost:8080/api", UriKind.Absolute)
 
             {
-                Запрос.Empty
+                Запрос.Пустой
                 with
                     Url = 
                         {
-                            Urls.Empty
+                            Urls.Пустые
                             with
                                 Raw = Uri (baseUrl, "people");
-                                Path = "/people";
+                                Путь = "/people";
                                 BaseUrl = baseUrl;
                         };
                     Verb = "POST";
                     Payload = 
                         {
-                            Payload.Empty
+                            Payload.Пустой
                             with
                                 Тело = stream;
                         }
@@ -92,7 +92,7 @@ module ``Execution facts`` =
                         {
                             TargetInfo.Empty
                             with
-                                Operation = fun _ -> OperationResult.Both (200, "Hello, World", [ ("key", "value"); ])
+                                Operation = fun _ -> РезультатОперации.Оба (200, "Hello, World", [ ("key", "value"); ])
                         };
             }
 
@@ -122,7 +122,7 @@ module ``Execution facts`` =
                 
             let isNothing result = 
                 match result with
-                | Success None -> true
+                | Успех None -> true
                 | _ -> false
 
             getArgs (false, true)
@@ -134,7 +134,7 @@ module ``Execution facts`` =
                 
             let isNothing result = 
                 match result with
-                | Success None -> true
+                | Успех None -> true
                 | _ -> false
                     
             getArgs (true, false)
@@ -146,7 +146,7 @@ module ``Execution facts`` =
                 
             let isCorrect result = 
                 match result with
-                | Success (Some value) -> ((string value) = "Hello, World")
+                | Успех (Some value) -> ((string value) = "Hello, World")
                 | _ -> false
 
             getArgs (true, true)
@@ -158,7 +158,7 @@ module ``Execution facts`` =
                 
             let isBadRequest result = 
                 match result with
-                | Failure statusCode -> statusCode = StatusCodes.BadRequest
+                | Провал statusCode -> statusCode = StatusCodes.BadRequest
                 | _ -> false
 
             let setFailingReader args = 
@@ -195,7 +195,7 @@ module ``Execution facts`` =
             
             let isCorrect result = 
                 match result with
-                | Success context -> context.Metadata.Запрос.Id = requestId
+                | Успех context -> context.Метаданные.Запрос.Id = requestId
                 | _ -> false
 
             let setRequestId (args : ExecutionArgs) = 
@@ -210,12 +210,12 @@ module ``Execution facts`` =
         let [<Fact>] ``User is set correctly on OperationMetadata when provided`` () =
 
             let setUser (args : ExecutionArgs) = 
-                { args with User = (Some { Id = "user.name"; Properties = []; }); }
+                { args with User = (Some { Id = "user.name"; Свойства = []; }); }
 
             let isCorrect result = 
                 match result with
-                | Success context -> 
-                    match context.Metadata.Пользователь with
+                | Успех context -> 
+                    match context.Метаданные.Пользователь with
                     | Some data -> data.Id = "user.name"
                     | _ -> false
                 | _ -> false
@@ -230,7 +230,7 @@ module ``Execution facts`` =
             
             let isCorrect result = 
                 match result with
-                | Success context -> Option.isNone context.Metadata.Пользователь
+                | Успех context -> Option.isNone context.Метаданные.Пользователь
                 | _ -> false
 
             getArgs' ()
@@ -254,8 +254,8 @@ module ``Execution facts`` =
 
             let isCorrect result = 
                 match result with
-                | Success context -> 
-                    match context.Metadata.Resolver with
+                | Успех context -> 
+                    match context.Метаданные.Resolver with
                     | Some resolver' -> 
                         match (resolver' typeof<int>) with
                         | Some value -> value = (box 42)
@@ -273,7 +273,7 @@ module ``Execution facts`` =
             
             let isCorrect result = 
                 match result with
-                | Success context -> Option.isNone context.Metadata.Resolver
+                | Успех context -> Option.isNone context.Метаданные.Resolver
                 | _ -> false
 
             getArgs' ()
@@ -294,33 +294,33 @@ module ``Execution facts`` =
                 Uri ("http://localhost:8080/api", UriKind.Absolute)
 
             {
-                Metadata = 
+                Метаданные = 
                     {
                         МетаданныеОперации.Пустые
                         with
                             Запрос = 
                                 {
-                                    Запрос.Empty
+                                    Запрос.Пустой
                                     with
                                         Url = 
                                             {
                                                 Raw = Uri (baseUrl, "people/12345");
-                                                Path = "/people/12345";
-                                                Query = [];
+                                                Путь = "/people/12345";
+                                                Запрос = [];
                                                 BaseUrl = baseUrl;
                                             };
                                 };
                     };
-                Message = None;
+                Сообщение = None;
             }
 
         let [<Fact>] ``Successful returns correct value`` () =
 
             let isCorrectValue result = 
                 match result with
-                | Success data ->
-                    data.StatusCode = (Some 200)
-                        && data.Resource = (Some (box "Hello, World"))
+                | Успех data ->
+                    data.КодСтатуса = (Some 200)
+                        && data.Ресурс = (Some (box "Hello, World"))
                 | _ -> false
 
             getArgs' ()
@@ -332,7 +332,7 @@ module ``Execution facts`` =
             
             let isServerError result = 
                 match result with
-                | Failure statusCode -> statusCode = 500
+                | Провал statusCode -> statusCode = 500
                 | _ -> false
 
             getArgs' ()
@@ -354,11 +354,11 @@ module ``Execution facts`` =
 
             let isDefaultStatusCode result = 
                 match result with
-                | Success (StatusCode statusCode, _) -> statusCode = DefaultStatusCode
+                | Успех (StatusCode statusCode, _) -> statusCode = DefaultStatusCode
                 | _ -> false
 
             getArgs' ()
-            |> getResponse OperationResult.Empty
+            |> getResponse РезультатОперации.Пустой
             |> isDefaultStatusCode
             |> should be True
 
@@ -366,11 +366,11 @@ module ``Execution facts`` =
 
             let isStatusCode result = 
                 match result with
-                | Success (StatusCode 418, _) -> true
+                | Успех (StatusCode 418, _) -> true
                 | _ -> false
 
             getArgs' ()
-            |> getResponse (OperationResult.StatusOnly 418)
+            |> getResponse (РезультатОперации.ТолькоСтатус 418)
             |> isStatusCode
             |> should be True
 
@@ -378,11 +378,11 @@ module ``Execution facts`` =
 
             let isDefaultStatusCode result = 
                 match result with
-                | Success (Resource (DefaultStatusCode, _), _) -> true
+                | Успех (Ресурс (DefaultStatusCode, _), _) -> true
                 | _ -> false
 
             getArgs' ()
-            |> getResponse ({ StatusCode = None; Resource = (Some (box  "Hello, World")); Headers = []; })
+            |> getResponse ({ КодСтатуса = None; Ресурс = (Some (box  "Hello, World")); Заголовки = []; })
             |> isDefaultStatusCode
             |> should be True
 
@@ -390,12 +390,12 @@ module ``Execution facts`` =
 
             let isNotAcceptable result = 
                 match result with
-                | Failure statusCode -> statusCode = StatusCodes.NotAcceptable
+                | Провал statusCode -> statusCode = StatusCodes.NotAcceptable
                 | _ -> false
 
             getArgs' ()
             |> setWriter None
-            |> getResponse (OperationResult.ResourceOnly "Hello, World")
+            |> getResponse (РезультатОперации.ТолькоРесурс "Hello, World")
             |> isNotAcceptable
             |> should be True
 
@@ -403,7 +403,7 @@ module ``Execution facts`` =
 
             let isNotAcceptable result = 
                 match result with
-                | Failure statusCode -> statusCode = StatusCodes.NotAcceptable
+                | Провал statusCode -> statusCode = StatusCodes.NotAcceptable
                 | _ -> false
 
             let writer = 
@@ -414,7 +414,7 @@ module ``Execution facts`` =
 
             getArgs' ()
             |> setWriter (Some writer)
-            |> getResponse (OperationResult.ResourceOnly "Hello, World")
+            |> getResponse (РезультатОперации.ТолькоРесурс "Hello, World")
             |> isNotAcceptable
             |> should be True
 
@@ -432,12 +432,12 @@ module ``Execution facts`` =
 
             let isCorrectValue result = 
                 match result with
-                | Success (Resource (_, bytes'), _) -> bytes' = bytes
+                | Успех (Ресурс (_, bytes'), _) -> bytes' = bytes
                 | _ -> false
 
             getArgs' ()
             |> setWriter (Some writer)
-            |> getResponse (OperationResult.ResourceOnly "Hello, World")
+            |> getResponse (РезультатОперации.ТолькоРесурс "Hello, World")
             |> isCorrectValue
             |> should be True
 
@@ -448,11 +448,11 @@ module ``Execution facts`` =
             
             let headersAreCorrect result = 
                 match result with
-                | Success (_, headers') -> headers' = headers
+                | Успех (_, headers') -> headers' = headers
                 | _ -> false
 
             getArgs' ()
-            |> getResponse (OperationResult.ResourceOnly ("Hello, World", headers))
+            |> getResponse (РезультатОперации.ТолькоРесурс ("Hello, World", headers))
             |> headersAreCorrect
             |> should be True
 
@@ -463,11 +463,11 @@ module ``Execution facts`` =
             
             let headersAreCorrect result = 
                 match result with
-                | Success (_, headers') -> headers' = headers
+                | Успех (_, headers') -> headers' = headers
                 | _ -> false
 
             getArgs' ()
-            |> getResponse (OperationResult.StatusOnly (200, headers))
+            |> getResponse (РезультатОперации.ТолькоСтатус (200, headers))
             |> headersAreCorrect
             |> should be True
 
@@ -493,8 +493,8 @@ module ``Execution facts`` =
             let isCorrectResponse result = 
                 match result with
                 | Stopped (Completed resp) ->
-                    match resp.ResponseType with
-                    | Resource (200, []) -> true
+                    match resp.ТипОтвета with
+                    | Ресурс (200, []) -> true
                     | _ -> false
                 | _ -> false
 
@@ -520,7 +520,7 @@ module ``Execution facts`` =
             let isContentTypeCorrect result = 
                 match result with
                 | Stopped (Completed resp) ->
-                    match resp.ContentType with
+                    match resp.ТипСодержимого with
                     | Some contentType -> contentType = МедиаТипы.Text.Xml
                     | _ -> false
                 | _ -> false
@@ -534,11 +534,11 @@ module ``Execution facts`` =
             
             let isContentTypeCorrect result = 
                 match result with
-                | Stopped (Completed resp) -> Option.isNone resp.ContentType
+                | Stopped (Completed resp) -> Option.isNone resp.ТипСодержимого
                 | _ -> false
 
             getArgs' ()
-            |> setOperation (fun _ -> OperationResult.Empty)
+            |> setOperation (fun _ -> РезультатОперации.Пустой)
             |> setWriter None
             |> run
             |> isContentTypeCorrect

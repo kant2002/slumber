@@ -4,65 +4,65 @@ open System
 open System.Diagnostics
 open Printf
 
-///Functions and types used for logging information
+/// Фцнкции и типы используемые для протоколирования информации
 [<AutoOpen>]
-module Logging = 
+module Протоколирование = 
 
-    ///Union describing a log entry
-    type LogEntry = 
-        | Debug of String
-        | Warning of String
-        | Info of String
-        | Error of (String * Exception option)
+    /// Объединение описывающее запись журнала
+    type ЗаписьЖурнала = 
+        | Отладка of String
+        | Предупреждение of String
+        | Информация of String
+        | Ошибка of (String * Exception option)
 
     ///Writes to the log output. Defaults to debug.
-    let mutable private _write = 
-        fun entry -> 
+    let mutable private _записать = 
+        fun запись -> 
 
-            let message, level = 
-                match entry with
-                | Debug msg -> msg, "Debug"
-                | Warning msg -> msg, "Warn"
-                | Info msg -> msg, "Info"
-                | Error (msg, Some ex) -> String.Format ("{0} : {1}", msg, ex.Message), "Error"
-                | Error (msg, _) -> msg, "Error"
+            let сообщение, уровень = 
+                match запись with
+                | Отладка сообщ -> сообщ, "Debug"
+                | Предупреждение сообщ -> сообщ, "Warn"
+                | Информация сообщ -> сообщ, "Info"
+                | Ошибка (сообщ, Some искл) -> String.Format ("{0} : {1}", сообщ, искл.Message), "Error"
+                | Ошибка (сообщ, _) -> сообщ, "Error"
 
-            let text = 
+            let текст = 
                 sprintf "%d %s %s %s" 
                 <| (getThreadId ()) 
                 <| (DateTime.Now.ToString ("yyyy-MM-dd HH:mm:ss")) 
-                <| level 
-                <| message
+                <| уровень 
+                <| сообщение
 
-            Trace.WriteLine text
+            Trace.WriteLine текст
 
-    ///Sets the writer used to record log entries
-    let setLogWriter writer = 
-        _write <- writer
+    /// Устанавливает писателя используемого для записи журнальных строк
+    let установитьПисательЖурнала писатель = 
+        _записать <- писатель
 
-    ///Writes a log entry 
-    let private log builder format =
-        kprintf (builder >> _write) format
+    /// Записывает журнальную строку
+    let private журнал строитель формат =
+        kprintf (строитель >> _записать) формат
 
-    ///Writes a debug entry in the log
-    let logDebug format = 
-        log (fun msg -> Debug (msg)) format
+    /// Записывает отладочную строку в журнал
+    let журналОтладка формат = 
+        журнал (fun сообщ -> Отладка (сообщ)) формат
 
-    ///Writes a warning entry in the log
-    let logWarn format = 
-        log (fun msg -> Warning (msg)) format
+    /// Записывает предупреждающую строку в журнал
+    let журналПредупр формат = 
+        журнал (fun сообщ -> Предупреждение (сообщ)) формат
 
-    ///Writes a info entry in the log
-    let logInfo format= 
-        log (fun msg -> Info (msg)) format
+    /// Записывает информационную строку в журнал
+    let журналИнфо формат= 
+        журнал (fun сообщ -> Информация (сообщ)) формат
 
-    ///Writes an error entry in the log
-    let logError format = 
-        log (fun msg -> Error (msg, None)) format
+    /// Записывает строку ошибки в журнал
+    let журналОшибка формат = 
+        журнал (fun сообщ -> Ошибка (сообщ, None)) формат
 
-    ///Writes an exception entry in the log
-    let logException ex format = 
-        log (fun msg -> Error (msg, Some ex)) format
+    /// Записывает строку исключения в журнал
+    let журналИсключение искл формат = 
+        журнал (fun сообщ -> Ошибка (сообщ, Some искл)) формат
 
 
 

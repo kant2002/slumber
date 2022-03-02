@@ -1,7 +1,7 @@
 ﻿namespace Дрема
 
 open System
-open Дрема.Common.Attempt
+open Дрема.Общее.Попытка
 open Дрема.Execution
 open Дрема.Framework
 open Дрема.Framework.Helpers
@@ -17,7 +17,7 @@ module Discovery =
 
     ///Represents the result of matching an HTTP request against a binding
     type MatchingResult = {
-        Binding : Binding;
+        Binding : Привязка;
         EndpointName : String;
         Parameters : (String * String) list;
     }
@@ -26,7 +26,7 @@ module Discovery =
         ///The empty matching result
         static member Empty = 
             {
-                Binding = Binding.Empty;
+                Binding = Привязка.Пустая;
                 EndpointName = String.Empty;
                 Parameters = [];
             }
@@ -35,8 +35,8 @@ module Discovery =
     module Matching = 
         
         open System.IO
-        open Дрема.Common.AsyncAttempt
-        open Дрема.Framework.Core.Endpoints
+        open Дрема.Общее.AsyncAttempt
+        open Дрема.Framework.Ядро.Endpoints
 
         ///Normalises a URL for template matching, ensuring folder-level URLs end with a trailing slash.
         ///This is important for cases when the base URL and candidate URL are essentially equal - e.g.
@@ -74,7 +74,7 @@ module Discovery =
             fun args ->
                 async { 
 
-                    logInfo "[%A] Resolving endpoint for %A" args.Запрос.Id args.Запрос.Url.Path
+                    журналИнфо "[%A] Resolving endpoint for %A" args.Запрос.Id args.Запрос.Url.Путь
 
                     return
                         args.Контейнер.Endpoints
@@ -83,7 +83,7 @@ module Discovery =
                                 | Some parameters -> Some (endpoint, parameters)
                                 | _ -> None
                             )    
-                        |> successOr StatusCodes.NotFound  
+                        |> успехИли StatusCodes.NotFound  
                 }
 
         ///Find the binding for the request verb
@@ -91,7 +91,7 @@ module Discovery =
             fun args -> 
                 async {
 
-                    logInfo "[%A] Resolving binding for %A" args.Запрос.Id args.Запрос.Verb
+                    журналИнфо "[%A] Resolving binding for %A" args.Запрос.Id args.Запрос.Verb
 
                     let createBindingInfo binding = 
                         match binding with
@@ -110,7 +110,7 @@ module Discovery =
                         endpoint
                         |> tryGetBinding args.Запрос.Verb
                         |> createBindingInfo
-                        |> successOr StatusCodes.MethodNotAllowed
+                        |> успехИли StatusCodes.MethodNotAllowed
                 }
 
         ///Asynchronously gets the result of matching the current request to an endpoint
@@ -130,10 +130,10 @@ module Discovery =
         let asyncAuthenticateRequest (result : MatchingResult) (args : DiscoveryArgs) =
             async {
                 
-                logInfo "[%A] Authenticating request" args.Запрос.Id
+                журналИнфо "[%A] Authenticating request" args.Запрос.Id
 
                 let isPublic = 
-                    match (result.Binding.SecurityMode, args.Контейнер.Security.DefaultMode) with
+                    match (result.Binding.РежимБезопасности, args.Контейнер.Security.DefaultMode) with
                     | (Some Public, _) -> true
                     | (None, Public) -> true
                     | _ -> false                    
@@ -141,36 +141,36 @@ module Discovery =
                 return
                     if isPublic then
 
-                        logInfo "[%A] Binding is public" args.Запрос.Id
+                        журналИнфо "[%A] Binding is public" args.Запрос.Id
 
-                        Success (None)
+                        Успех (None)
                     else
-                        match args.Контейнер.Security.Authenticate with
+                        match args.Контейнер.Security.Авторизовать with
                         | None ->
 
-                            logWarn "[%A] Binding is private but container defines no authentication function" args.Запрос.Id
+                            журналПредупр "[%A] Binding is private but container defines no authentication function" args.Запрос.Id
 
-                            Success (None)
+                            Успех (None)
 
                         | Some auth ->
                             match (auth args.Запрос) with
                             | Разрешено userData ->
 
-                                logInfo "[%A] Request was successfully authenticated" args.Запрос.Id
+                                журналИнфо "[%A] Request was successfully authenticated" args.Запрос.Id
                             
-                                Success (userData)
+                                Успех (userData)
 
                             | _ ->
 
-                                logInfo "[%A] Authentication failed for request" args.Запрос.Id
+                                журналИнфо "[%A] Authentication failed for request" args.Запрос.Id
 
-                                Failure StatusCodes.Unauthorised
+                                Провал StatusCodes.Unauthorised
             }
             
     ///Contains functions for negotiating content types based on the Content-Type and Accept header
     module Negotiation = 
 
-        open Дрема.Framework.Core.Containers
+        open Дрема.Framework.Ядро.Containers
 
         ///The default content type to be used if the Content-Type of Accept headers are omitted
         let [<Literal>] DefaultMediaType = МедиаТипы.Text.Xml
@@ -182,7 +182,7 @@ module Discovery =
         let asyncGetReader args = 
             async {
 
-                logInfo "[%A] Negotiating request content type" args.Запрос.Id
+                журналИнфо "[%A] Negotiating request content type" args.Запрос.Id
 
                 let requestedContentType = 
                     match (Заголовки.getContentType args.Запрос.Payload.Заголовки) with
@@ -194,14 +194,14 @@ module Discovery =
                     |> applyForwarding requestedContentType
 
                 if (targetContentType <> requestedContentType) then
-                    logInfo "[%A] Request content type forwarding from %A to %A" args.Запрос.Id requestedContentType targetContentType
+                    журналИнфо "[%A] Request content type forwarding from %A to %A" args.Запрос.Id requestedContentType targetContentType
 
                 let reader = 
                     args.Контейнер
                     |> getReader targetContentType
 
                 if (Option.isSome reader) then
-                    logInfo "[%A] Selected request content type of %A" args.Запрос.Id targetContentType
+                    журналИнфо "[%A] Selected request content type of %A" args.Запрос.Id targetContentType
 
                 return
                     match reader with
@@ -213,7 +213,7 @@ module Discovery =
         let asyncGetWriter args =
             async {
 
-                logInfo "[%A] Negotiating response content type" args.Запрос.Id
+                журналИнфо "[%A] Negotiating response content type" args.Запрос.Id
 
                 let requestedContentType = 
                     match (Заголовки.getAccept args.Запрос.Payload.Заголовки) with
@@ -231,7 +231,7 @@ module Discovery =
                                 |> applyForwarding contentType
 
                             if (targetContentType <> contentType) then
-                                logInfo "[%A] Response content type forwarding from %A to %A" args.Запрос.Id contentType targetContentType
+                                журналИнфо "[%A] Response content type forwarding from %A to %A" args.Запрос.Id contentType targetContentType
 
                             match (getWriter targetContentType args.Контейнер) with
                             | Some writer -> Some (targetContentType, writer)
@@ -240,7 +240,7 @@ module Discovery =
 
                 match writer with
                 | Some (contentType, _) ->
-                    logInfo "[%A] Selected response content type of %A" args.Запрос.Id contentType
+                    журналИнфо "[%A] Selected response content type of %A" args.Запрос.Id contentType
                 | _ -> ()
 
                 return  writer
@@ -276,7 +276,7 @@ module Discovery =
                 let! reader = Negotiation.asyncGetReader args
                 let! writer = Negotiation.asyncGetWriter args
 
-                match (result.Binding.MessageType, reader) with
+                match (result.Binding.ТипСообщения, reader) with
                 | (_, None) -> 
                     return stopWithStatus StatusCodes.ContentTypeNotSupported
                 | (messageType, Some reader') ->                   
@@ -289,7 +289,7 @@ module Discovery =
                             Target = 
                                 {
                                     EndpointName = result.EndpointName;
-                                    Operation = result.Binding.Operation;
+                                    Operation = result.Binding.Операция;
                                     Parameters = result.Parameters;
                                 }
                             User = userData;
@@ -303,19 +303,19 @@ module Discovery =
                 let! authResult = Security.asyncAuthenticateRequest result args
 
                 match authResult with
-                | Failure statusCode -> return stopWithStatus statusCode
-                | Success userData -> return! onAuthenticationSuccess result userData
+                | Провал statusCode -> return stopWithStatus statusCode
+                | Успех userData -> return! onAuthenticationSuccess result userData
             }
 
         async {
 
-            logInfo "[%A] Beginning discovery phase for %A %A" args.Запрос.Id args.Запрос.Verb args.Запрос.Url.Path
+            журналИнфо "[%A] Beginning discovery phase for %A %A" args.Запрос.Id args.Запрос.Verb args.Запрос.Url.Путь
             
             let! matchingResult = Matching.asyncGetMatchingResult args            
 
             match matchingResult with
-            | Failure statusCode -> return stopWithStatus statusCode
-            | Success info -> return! onMatchingSuccess info args
+            | Провал statusCode -> return stopWithStatus statusCode
+            | Успех info -> return! onMatchingSuccess info args
         }
         
     ///Runs the discovery phase synchronously

@@ -21,7 +21,7 @@ module ``Setup facts`` =
             let noop () = 
                 ()
 
-            let getVerb (binding : Binding) = 
+            let getVerb (binding : Привязка) = 
                 binding.Verb
 
         [<Trait (Traits.Names.Module, ModuleName)>]
@@ -46,7 +46,7 @@ module ``Setup facts`` =
                 assertIsFunction (fun (_ : МетаданныеОперации) -> ())
 
             let [<Fact>] ``Correct value returned for function (6)`` () = 
-                assertIsFunction (fun () -> OperationResult.Empty)
+                assertIsFunction (fun () -> РезультатОперации.Пустой)
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``getArgumentType function`` = 
@@ -205,29 +205,29 @@ module ``Setup facts`` =
                 let withQueryParameter key value context = 
                     
                     let request = 
-                        { context.Metadata.Запрос
+                        { context.Метаданные.Запрос
                             with
                                 Url = 
-                                    { context.Metadata.Запрос.Url
+                                    { context.Метаданные.Запрос.Url
                                         with
-                                            Query = ((key, value) :: context.Metadata.Запрос.Url.Query);
+                                            Запрос = ((key, value) :: context.Метаданные.Запрос.Url.Запрос);
                                     };
                         }
 
                     { context 
                         with
-                            Metadata =  { context.Metadata with Запрос = request; };                                
+                            Метаданные =  { context.Метаданные with Запрос = request; };                                
                     }
 
                 let withUriParameter key value context = 
                     
                     let metadata = 
-                        { context.Metadata
+                        { context.Метаданные
                             with
-                                Параметры = ((key, value) :: context.Metadata.Параметры);
+                                Параметры = ((key, value) :: context.Метаданные.Параметры);
                         }
 
-                    { context with Metadata = metadata; }
+                    { context with Метаданные = metadata; }
 
                 let resolving value context = 
 
@@ -239,17 +239,17 @@ module ``Setup facts`` =
                                 None
                     
                     let metadata = 
-                        { context.Metadata
+                        { context.Метаданные
                             with
                                 Resolver = (Some resolver);
                         }
 
-                    { context with Metadata = metadata; }
+                    { context with Метаданные = metadata; }
 
             let [<Fact>] ``Returns correct message value`` () = 
                 
                 let message = { Value = "Hello, World" }
-                let context = { OperationContext.Empty with Message = (Some (box message)); }
+                let context = { КонтекстОперации.Empty with Сообщение = (Some (box message)); }
                 let value = getArgumentValue context (Message (false, typeof<Dummy>))
 
                 Assert.Equal ((box message), value)
@@ -257,14 +257,14 @@ module ``Setup facts`` =
             let [<Fact>] ``Returns Some when message is optional and present`` () = 
                 
                 let message = { Value = "Hello, World" }
-                let context = { OperationContext.Empty with Message = (Some (box message)); }
+                let context = { КонтекстОперации.Empty with Сообщение = (Some (box message)); }
                 let value = getArgumentValue context (Message (true, typeof<Dummy>))
 
                 Assert.Equal ((box (Some message)), value)
 
             let [<Fact>] ``Returns None when message is optional and not present`` () = 
                 
-                let context = { OperationContext.Empty with Message = None; }
+                let context = { КонтекстОперации.Empty with Сообщение = None; }
                 let value = getArgumentValue context (Message (true, typeof<Dummy>))
 
                 Assert.Equal ((box Option<Dummy>.None), value)
@@ -272,7 +272,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Throws FormatException when message is not optional and not present`` () = 
                 Assert.Throws<FormatException> (fun () ->
 
-                    let context = { OperationContext.Empty with Message = None; }
+                    let context = { КонтекстОперации.Empty with Сообщение = None; }
                     
                     getArgumentValue context (Message (false, typeof<Dummy>))
                     |> ignore
@@ -280,14 +280,14 @@ module ``Setup facts`` =
 
             let [<Fact>] ``Returns correct parameter value from URI parameters`` () = 
                 
-                let context = withUriParameter "key" "value" OperationContext.Empty
+                let context = withUriParameter "key" "value" КонтекстОперации.Empty
                 let value = getArgumentValue context (Parameter ("key", false, typeof<String>))
 
                 Assert.Equal ((box "value"), value)
 
             let [<Fact>] ``Returns correct parameter value from query string parameters`` () = 
                 
-                let context = withQueryParameter "key" "value" OperationContext.Empty
+                let context = withQueryParameter "key" "value" КонтекстОперации.Empty
                 let value = getArgumentValue context (Parameter ("key", false, typeof<String>))
 
                 Assert.Equal ((box "value"), value)
@@ -295,7 +295,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Returns parameter value from URI in preference to query string`` () =     
                 
                 let context = 
-                    OperationContext.Empty
+                    КонтекстОперации.Empty
                     |> withUriParameter "key" "uri.value"
                     |> withQueryParameter "key" "query.value"
 
@@ -305,42 +305,42 @@ module ``Setup facts`` =
 
             let [<Fact>] ``Returns Some when parameter is optional and present`` () = 
                 
-                let context = withQueryParameter "key" "value" OperationContext.Empty
+                let context = withQueryParameter "key" "value" КонтекстОперации.Empty
                 let value = getArgumentValue context (Parameter ("key", true, typeof<String>))
 
                 Assert.Equal ((box (Some "value")), value)
 
             let [<Fact>] ``Returns None when parameter is optional and not present`` () = 
                 
-                let value = getArgumentValue OperationContext.Empty (Parameter ("key", true, typeof<String>))
+                let value = getArgumentValue КонтекстОперации.Empty (Parameter ("key", true, typeof<String>))
 
                 Assert.Equal ((box Option<String>.None), value)
 
             let [<Fact>] ``Throws FormatException when parameter is not optional and not present`` () = 
                 Assert.Throws<FormatException> (fun () ->
 
-                    getArgumentValue OperationContext.Empty (Parameter ("key", false, typeof<String>))
+                    getArgumentValue КонтекстОперации.Empty (Parameter ("key", false, typeof<String>))
                     |> ignore
 
                 )
 
             let [<Fact>] ``Returns correct unit value`` () = 
                 
-                let value = getArgumentValue OperationContext.Empty Unit'
+                let value = getArgumentValue КонтекстОперации.Empty Unit'
 
                 Assert.Equal ((box ()), value)
 
             let [<Fact>] ``Returns correct metadata value`` () = 
                 
-                let context = OperationContext.Empty
+                let context = КонтекстОперации.Empty
                 let value = getArgumentValue context Metadata
 
-                Assert.Equal ((box context.Metadata), value)
+                Assert.Equal ((box context.Метаданные), value)
 
             let [<Fact>] ``Returns correct dependency value`` () = 
                 
                 let expected = Widget () :> IWidget
-                let context = OperationContext.Empty |> resolving expected
+                let context = КонтекстОперации.Empty |> resolving expected
                 let actual = getArgumentValue context (Dependency (false, typeof<IWidget>))
 
                 Assert.Equal ((box expected), actual)
@@ -348,7 +348,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Returns Some when dependency is optional and present`` () = 
                 
                 let expected = Widget () :> IWidget
-                let context = OperationContext.Empty |> resolving expected
+                let context = КонтекстОперации.Empty |> resolving expected
                 let actual = getArgumentValue context (Dependency (true, typeof<IWidget>))
 
                 Assert.Equal ((box (Some expected)), actual)
@@ -356,14 +356,14 @@ module ``Setup facts`` =
             let [<Fact>] ``Returns None when dependency is optional and not present`` () = 
                 
                 let expected = Option<IWidget>.None
-                let actual = getArgumentValue OperationContext.Empty (Dependency (true, typeof<IWidget>))
+                let actual = getArgumentValue КонтекстОперации.Empty (Dependency (true, typeof<IWidget>))
 
                 Assert.Equal ((box expected), actual)
 
             let [<Fact>] ``Throws InvalidOperationException when dependency is not optional and not present`` () = 
                 Assert.Throws<InvalidOperationException> (fun () ->
 
-                    getArgumentValue OperationContext.Empty (Dependency (false, typeof<IWidget>))
+                    getArgumentValue КонтекстОперации.Empty (Dependency (false, typeof<IWidget>))
                     |> ignore
 
                 )
@@ -411,11 +411,11 @@ module ``Setup facts`` =
                 getReturnType' (fun () -> ()) |> isVoid |> should be True
 
             let [<Fact>] ``Returns Result for OperationResult`` () =
-                getReturnType' (fun () -> OperationResult.Empty) |> isResult |> should be True
+                getReturnType' (fun () -> РезультатОперации.Пустой) |> isResult |> should be True
 
             let [<Fact>] ``SetupException is thrown for optional OperationResult`` () =
                 (fun () ->
-                    getReturnType' (fun () -> Some OperationResult.Empty)
+                    getReturnType' (fun () -> Some РезультатОперации.Пустой)
                     |> ignore
                 ) |> should throw typeof<SetupException>
 
@@ -435,11 +435,11 @@ module ``Setup facts`` =
                 getReturnType' (fun () -> async { return () }) |> isVoid |> should be True
 
             let [<Fact>] ``Returns Result for async OperationResult`` () = 
-                getReturnType' (fun () -> async { return OperationResult.Empty }) |> isResult |> should be True
+                getReturnType' (fun () -> async { return РезультатОперации.Пустой }) |> isResult |> should be True
 
             let [<Fact>] ``SetupException is thrown for async optional OperationResult`` () = 
                 (fun () ->
-                    getReturnType' (fun () -> async { return (Some OperationResult.Empty) })
+                    getReturnType' (fun () -> async { return (Some РезультатОперации.Пустой) })
                     |> ignore
                 ) |> should throw typeof<SetupException>
 
@@ -464,12 +464,12 @@ module ``Setup facts`` =
                 let getOperationResult' value returnType = 
                     getOperationResult (box value) returnType
 
-            let [<Fact>] ``Returns OperationResult.Empty for Void return types`` () = 
-                getOperationResult' () Void |> should equal OperationResult.Empty
+            let [<Fact>] ``Returns РезультатОперации.Пустой for Void return types`` () = 
+                getOperationResult' () Void |> should equal РезультатОперации.Пустой
 
             let [<Fact>] ``Returns value as OperationResult for Result return types`` () = 
 
-                let result = { OperationResult.Empty with StatusCode = (Some 418); }
+                let result = { РезультатОперации.Пустой with КодСтатуса = (Some 418); }
 
                 getOperationResult' result Result |> should equal result
 
@@ -478,24 +478,24 @@ module ``Setup facts`` =
                 let returnType = ReturnType.Resource (true, typeof<String>)
                 let result = getOperationResult' (Some "Hello, World") returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.get |> should equal (box "Hello, World")
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.get |> should equal (box "Hello, World")
 
             let [<Fact>] ``Returns None as resource for optional Resource return types when the value is None`` () = 
                 
                 let returnType = ReturnType.Resource (true, typeof<String>)
                 let result = getOperationResult' None returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.isNone |> should be True
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.isNone |> should be True
 
             let [<Fact>] ``Returns value as resource for non-optional Resource return types`` () = 
                 
                 let returnType = ReturnType.Resource (false, typeof<String>)
                 let result = getOperationResult' "Hello, World" returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.get |> should equal (box "Hello, World")
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.get |> should equal (box "Hello, World")
 
             let [<Fact>] ``Executes async values for Void return types`` () = 
 
@@ -511,12 +511,12 @@ module ``Setup facts`` =
 
                 run.Value |> should be True
 
-            let [<Fact>] ``Returns OperationResult.Empty for async Void return types`` () =
-                getOperationResult' (async { return () }) Void |> should equal OperationResult.Empty
+            let [<Fact>] ``Returns РезультатОперации.Пустой for async Void return types`` () =
+                getOperationResult' (async { return () }) Void |> should equal РезультатОперации.Пустой
 
             let [<Fact>] ``Returns execution result of value as OperationResult for async Result return types`` () =
                 
-                let result = { OperationResult.Empty with StatusCode = (Some 418); }
+                let result = { РезультатОперации.Пустой with КодСтатуса = (Some 418); }
                 let asyncResult = async { return result }
 
                 getOperationResult' asyncResult Result |> should equal result
@@ -527,8 +527,8 @@ module ``Setup facts`` =
                 let value = async { return (Some "Hello, World") }
                 let result = getOperationResult' value returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.get |> should equal (box "Hello, World")
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.get |> should equal (box "Hello, World")
 
             let [<Fact>] ``Returns None as resource for optional async Resource return types when execution result of value is None`` () = 
                 
@@ -536,8 +536,8 @@ module ``Setup facts`` =
                 let value = async { return None }
                 let result = getOperationResult' value returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.isNone |> should be True
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.isNone |> should be True
 
             let [<Fact>] ``Returns execution result of value as resource for non-optional async Resource return types`` () =
                 
@@ -545,8 +545,8 @@ module ``Setup facts`` =
                 let value = async { return "Hello, World" }
                 let result = getOperationResult' value returnType
 
-                result.StatusCode |> Option.isNone |> should be True
-                result.Resource |> Option.get |> should equal (box "Hello, World")
+                result.КодСтатуса |> Option.isNone |> should be True
+                result.Ресурс |> Option.get |> should equal (box "Hello, World")
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``get function`` = 
@@ -597,10 +597,10 @@ module ``Setup facts`` =
             module private Helpers = 
 
                 let getMessageType binding = 
-                    binding.MessageType
+                    binding.ТипСообщения
 
                 let getMode binding = 
-                    binding.SecurityMode
+                    binding.РежимБезопасности
 
                 let bindModifyAndCall modifier f =
 
@@ -613,36 +613,36 @@ module ``Setup facts`` =
                             Uri ("http://localhost:8080", UriKind.Absolute)
 
                         {
-                            Metadata = 
+                            Метаданные = 
                                 {
                                     МетаданныеОперации.Пустые
                                     with
                                         Запрос = 
                                             { 
-                                                Запрос.Empty 
+                                                Запрос.Пустой 
                                                 with
                                                     Url = 
                                                         {
                                                             Raw = baseUrl;
-                                                            Path = "/";
-                                                            Query = [];
+                                                            Путь = "/";
+                                                            Запрос = [];
                                                             BaseUrl = baseUrl;
                                                         };
                                             };
                                 };
-                            Message = None;
+                            Сообщение = None;
                         }
 
                     context
                     |> modifier
-                    |> binding.Operation
+                    |> binding.Операция
 
                 let bindAndCallWith message = 
                     bindModifyAndCall (fun context ->
                         {
                             context 
                             with
-                                Message = message;
+                                Сообщение = message;
                         }
                     )
                     
@@ -682,9 +682,9 @@ module ``Setup facts`` =
                     {
                         context
                         with
-                            Metadata = 
+                            Метаданные = 
                                 {
-                                    context.Metadata
+                                    context.Метаданные
                                     with
                                         Параметры = [ ("arg", "value"); ];
                                 }
@@ -709,14 +709,14 @@ module ``Setup facts`` =
                     
                     let url = 
                         {
-                            context.Metadata.Запрос.Url
+                            context.Метаданные.Запрос.Url
                             with
-                                Query = [ ("arg", "value"); ];
+                                Запрос = [ ("arg", "value"); ];
                         }
 
-                    let request = { context.Metadata.Запрос with Url = url; }
+                    let request = { context.Метаданные.Запрос with Url = url; }
 
-                    { context with Metadata = { context.Metadata with Запрос = request; }; }
+                    { context with Метаданные = { context.Метаданные with Запрос = request; }; }
 
                 bindModifyAndCall modifier op
                 |> ignore
@@ -763,12 +763,12 @@ module ``Setup facts`` =
                 Assert.True (_called.Value)
 
             let [<Fact>] ``Correct result is returned for no op targets`` () =
-                bindAndCall (fun () -> ()) |> should equal OperationResult.Empty
+                bindAndCall (fun () -> ()) |> should equal РезультатОперации.Пустой
 
             let [<Fact>] ``Correct result is returned for resource returning targets`` () =
 
                 let isCorrect result = 
-                    match result.Resource with
+                    match result.Ресурс with
                     | Some value -> value.Equals "Hello, World"
                     | _ -> false
 
@@ -777,49 +777,49 @@ module ``Setup facts`` =
                 |> should be True
 
             let [<Fact>] ``Correct result is returned for optional resource returning targets (Some)`` () =
-                bindAndCall (fun () -> Some "Hello, World") |> should equal (OperationResult.ResourceOnly "Hello, World")
+                bindAndCall (fun () -> Some "Hello, World") |> should equal (РезультатОперации.ТолькоРесурс "Hello, World")
 
             let [<Fact>] ``Correct result is returned for optional resource returning targets (None)`` () =
-                bindAndCall (fun  () -> None) |> should equal OperationResult.Empty
+                bindAndCall (fun  () -> None) |> should equal РезультатОперации.Пустой
 
             let [<Fact>] ``Correct result is returned for OperationResult returning targets`` () =
-                bindAndCall (fun () -> OperationResult.StatusOnly 12345) |> should equal (OperationResult.StatusOnly 12345)
+                bindAndCall (fun () -> РезультатОперации.ТолькоСтатус 12345) |> should equal (РезультатОперации.ТолькоСтатус 12345)
 
             let [<Fact>] ``HTTP 400 is returned if required argument is not present`` () =
-                bindAndCall (fun  (arg : Int32) -> ()) |> should equal (OperationResult.StatusOnly StatusCodes.BadRequest)
+                bindAndCall (fun  (arg : Int32) -> ()) |> should equal (РезультатОперации.ТолькоСтатус StatusCodes.BadRequest)
 
             let [<Fact>] ``HTTP 400 is returned if required message is not present`` () =
-                bindAndCallWith None (fun (_ : obj) -> ()) |> should equal (OperationResult.StatusOnly StatusCodes.BadRequest)
+                bindAndCallWith None (fun (_ : obj) -> ()) |> should equal (РезультатОперации.ТолькоСтатус StatusCodes.BadRequest)
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``public' function`` = 
 
             let [<Fact>] ``Sets security mode to public`` () = 
 
-                let op _ = OperationResult.Empty
+                let op _ = РезультатОперации.Пустой
                 let verb f = bind "VERB" f
 
                 let binding = 
                     public' verb op
 
-                binding.SecurityMode |> Option.get |> should equal SecurityMode.Public
+                binding.РежимБезопасности |> Option.get |> should equal РежимБезопасности.Public
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``private' function`` = 
 
             let [<Fact>] ``Sets security mode to private`` () = 
 
-                let op _ = OperationResult.Empty
+                let op _ = РезультатОперации.Пустой
                 let verb f = bind "VERB" f
 
                 let binding = 
                     private' verb op
 
-                binding.SecurityMode |> Option.get |> should equal SecurityMode.Private
+                binding.РежимБезопасности |> Option.get |> should equal РежимБезопасности.Private
 
     module ``Endpoints facts`` = 
 
-        open Framework.Core.Endpoints
+        open Framework.Ядро.Endpoints
 
         let [<Literal>] ModuleName = "Setup.Endpoints"
 
@@ -849,7 +849,7 @@ module ``Setup facts`` =
 
                 let binding = 
                     {
-                        Binding.Empty
+                        Привязка.Пустая
                         with
                             Verb = "VERB"
                     }
@@ -866,7 +866,7 @@ module ``Setup facts`` =
 
                 let binding = 
                     {
-                        Binding.Empty
+                        Привязка.Пустая
                         with
                             Verb = "VERB";
                     }
@@ -880,7 +880,7 @@ module ``Setup facts`` =
 
     module ``Containers facts`` = 
 
-        open Framework.Core.Containers
+        open Framework.Ядро.Containers
 
         let [<Literal>] ModuleName = "Setup.Containers"
 
@@ -922,16 +922,16 @@ module ``Setup facts`` =
             let [<Fact>] ``Sets authentication function`` () =
 
                 let config =
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> authenticatedBy auth false
                     |> getSecurityConfig
 
-                config.Authenticate |> Option.isSome |> should be True
+                config.Авторизовать |> Option.isSome |> should be True
 
             let [<Fact>] ``Sets default mode to private when privateByDefault is true`` () =
                 
                 let config = 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> setDefault Public
                     |> authenticatedBy auth true
                     |> getSecurityConfig
@@ -941,7 +941,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Sets default mode to public when privateByDefault is false`` () =
 
                 let config = 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> setDefault Private
                     |> authenticatedBy auth false
                     |> getSecurityConfig
@@ -957,7 +957,7 @@ module ``Setup facts`` =
                     { Endpoint.Empty with Шаблон = "/"; }
 
                 let endpoint' = 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> with' endpoint
                     |> getEndpoints
                     |> List.head
@@ -973,7 +973,7 @@ module ``Setup facts`` =
                     { Endpoint.Empty with Шаблон = "/{no}"; }
 
                 (fun () ->
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> with' endpoint1
                     |> with' endpoint2
                     |> ignore
@@ -987,7 +987,7 @@ module ``Setup facts`` =
                 let hasCorrectBindings container = 
                     container.Endpoints
                     |> List.exists (fun endpoint ->
-                            endpoint.Bindings
+                            endpoint.Привязки
                             |> List.map (fun binding -> binding.Verb)
                             |> List.exists (fun verb -> verb = "OPTIONS")
                             |> not
@@ -996,7 +996,7 @@ module ``Setup facts`` =
 
                 let container = 
                     {
-                        Контейнер.Empty
+                        Контейнер.Пустой
                         with
                             Endpoints = 
                                 [
@@ -1006,7 +1006,7 @@ module ``Setup facts`` =
                     }
 
                 container
-                |> all { Binding.Empty with Verb = "OPTIONS"; }
+                |> all { Привязка.Пустая with Verb = "OPTIONS"; }
                 |> hasCorrectBindings
                 |> should be True
 
@@ -1014,17 +1014,17 @@ module ``Setup facts`` =
                 
                 let container = 
                     {
-                        Контейнер.Empty
+                        Контейнер.Пустой
                         with
                             Endpoints = 
                                 [
                                     {
                                         Endpoint.Empty
                                         with
-                                            Bindings = 
+                                            Привязки = 
                                                 [
                                                     {
-                                                        Binding.Empty
+                                                        Привязка.Пустая
                                                         with
                                                             Verb = "OPTIONS";
                                                     }
@@ -1035,7 +1035,7 @@ module ``Setup facts`` =
 
                 (fun () ->
                     container
-                    |> all ({ Binding.Empty with Verb = "OPTIONS"; })
+                    |> all ({ Привязка.Пустая with Verb = "OPTIONS"; })
                     |> ignore
 
                 ) |> should throw typeof<NotSupportedException>
@@ -1048,7 +1048,7 @@ module ``Setup facts`` =
                 []
 
             let [<Fact>] ``Writer is added to content types`` () =
-                Контейнер.Empty
+                Контейнер.Пустой
                 |> writing МедиаТипы.Text.Xml write
                 |> getWriter МедиаТипы.Text.Xml
                 |> Option.isSome
@@ -1057,7 +1057,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Duplicate content type raises SetupException`` () =
                 (fun () ->
 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> writing МедиаТипы.Text.Xml write
                     |> writing МедиаТипы.Text.Xml write
                     |> ignore
@@ -1071,7 +1071,7 @@ module ``Setup facts`` =
                 None
 
             let [<Fact>] ``Reader is added to content types`` () =
-                Контейнер.Empty
+                Контейнер.Пустой
                 |> reading МедиаТипы.Text.Xml read
                 |> getReader МедиаТипы.Text.Xml
                 |> Option.isSome
@@ -1080,7 +1080,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Duplicate content type raises SetupException`` () =
                 (fun () ->
 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> reading МедиаТипы.Text.Xml read
                     |> reading МедиаТипы.Text.Xml read
                     |> ignore
@@ -1091,7 +1091,7 @@ module ``Setup facts`` =
         module ``forwarding function`` =
 
             let [<Fact>] ``Forwarded types are added to contianer`` () =
-                Контейнер.Empty
+                Контейнер.Пустой
                 |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
                 |> applyForwarding МедиаТипы.Text.Html
                 |> should equal МедиаТипы.Text.Xml
@@ -1099,7 +1099,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Duplicate from type raises SetupException`` () =
                 (fun () ->
 
-                    Контейнер.Empty
+                    Контейнер.Пустой
                     |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
                     |> forwarding МедиаТипы.Text.Html МедиаТипы.Application.Json
                     |> ignore

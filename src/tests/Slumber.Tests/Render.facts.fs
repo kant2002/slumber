@@ -43,12 +43,12 @@ module ``Render facts`` =
 
                     let responseType = 
                         match body with 
-                        | Some bytes -> Resource (200, bytes)
+                        | Some bytes -> Ресурс (200, bytes)
                         | _ -> StatusCode 200
 
                     {
-                        ResponseType = responseType;
-                        ContentType = None;
+                        ТипОтвета = responseType;
+                        ТипСодержимого = None;
                         CustomHeaders = [];
                     }
 
@@ -93,12 +93,12 @@ module ``Render facts`` =
                     
                     let responseType =
                         match body with
-                        | Some bytes -> Resource (200, bytes)
+                        | Some bytes -> Ресурс (200, bytes)
                         | _ -> StatusCode (200)
 
                     {
-                        ResponseType = responseType;
-                        ContentType = contentType;
+                        ТипОтвета = responseType;
+                        ТипСодержимого = contentType;
                         CustomHeaders = headers;
                     }
 
@@ -179,12 +179,12 @@ module ``Render facts`` =
                         if isStatusOnly then
                             StatusCode 418
                         else
-                            Resource (418, [])
+                            Ресурс (418, [])
 
                     {
-                        ResponseType = responseType;
+                        ТипОтвета = responseType;
                         CustomHeaders = [];
-                        ContentType = None;
+                        ТипСодержимого = None;
                     }
 
             let [<Fact>] ``Status code is set correctly for resource responses`` () = 
@@ -219,9 +219,9 @@ module ``Render facts`` =
             |> Async.RunSynchronously
 
         let getStatusCode response = 
-            match response.ResponseType with
+            match response.ТипОтвета with
             | StatusCode statusCode -> statusCode
-            | Resource (statusCode, _) -> statusCode
+            | Ресурс (statusCode, _) -> statusCode
 
         let [<Fact>] ``Running state returns HTTP 500`` () =
             Running (10) |> getResponse |> getStatusCode |> should equal StatusCodes.InternalServerError
@@ -232,6 +232,6 @@ module ``Render facts`` =
         let [<Fact>] ``Stopped (completed) state returns response`` () = 
 
             let response = 
-                { Ответ.Empty with ResponseType = StatusCode (418); }
+                { Ответ.Пустой with ТипОтвета = StatusCode (418); }
 
             Stopped (Completed response) |> getResponse |> getStatusCode |> should equal 418

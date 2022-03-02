@@ -8,7 +8,7 @@ module Startup =
 
     open Дрема    
     open Дрема.Framework
-    open Дрема.Common.Http
+    open Дрема.Общее.Http
 
     [<AutoOpen>]
     module Model = 

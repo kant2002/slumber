@@ -3,9 +3,9 @@
 open System
 open Дрема
 open Дрема.Framework
-open Дрема.Framework.Core.Containers
+open Дрема.Framework.Ядро.Containers
 
-module Common = 
+module Общее = 
 
     let options (meta : МетаданныеОперации) = 
 
@@ -16,13 +16,13 @@ module Common =
             |> Option.get
 
         let verbs = 
-            endpoint.Bindings
+            endpoint.Привязки
             |> List.map (fun binding -> binding.Verb)
             
         let accept = 
             String.Join (",", verbs)
 
-        OperationResult.StatusOnly (
+        РезультатОперации.ТолькоСтатус (
             StatusCodes.Ok,
             [ (Заголовки.Accept, accept) ]
         )

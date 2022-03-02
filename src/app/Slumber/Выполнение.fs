@@ -2,7 +2,7 @@
 
 open System
 open HandyFS.Option
-open Дрема.Common.AsyncAttempt
+open Дрема.Общее.AsyncAttempt
 open Дрема.Framework
 open Дрема.Framework.Helpers
 open Дрема.Render
@@ -15,21 +15,21 @@ module Execution =
 
     ///Represents the selected message deserialiser and associated information
     type ReaderInfo = {
-        Reader : MessageIO.Reader;
+        Reader : ВВСообщений.Читатель;
         ContentType : String;
         MessageType : Type;
     }
 
     ///Represents the selected message serialiser and associated information
     type WriterInfo = {
-        Writer : MessageIO.Writer;
+        Writer : ВВСообщений.Писатель;
         ContentType : String;
     }
 
     ///Represents the selected operation and associated information
     type TargetInfo = {
         EndpointName : String;
-        Operation : Operation;
+        Operation : Операция;
         Parameters : (String * String) list;
     }
     with
@@ -38,7 +38,7 @@ module Execution =
         static member Empty = 
             {
                 EndpointName = String.Empty;
-                Operation = (fun _ -> OperationResult.Empty);
+                Operation = (fun _ -> РезультатОперации.Пустой);
                 Parameters = [];
             }
 
@@ -56,8 +56,8 @@ module Execution =
         ///Empty execution args
         static member Empty = 
             {
-                Request = Запрос.Empty;
-                Container = Контейнер.Empty;
+                Request = Запрос.Пустой;
+                Container = Контейнер.Пустой;
                 Reader = None;
                 Writer = None;
                 Target = TargetInfo.Empty;
@@ -74,28 +74,28 @@ module Execution =
                         match (args.Request.Payload.Тело, args.Reader) with
                         | (Some _, None) ->
 
-                            logWarn "[%A] Request message received but no reader selected" args.Request.Id
+                            журналПредупр "[%A] Request message received but no reader selected" args.Request.Id
 
                             None
 
                         | (None, _) | (_, None) -> None
                         | (Some stream, Some reader) ->
 
-                            logInfo "[%A] Deserialising request message" args.Request.Id
+                            журналИнфо "[%A] Deserialising request message" args.Request.Id
 
                             reader.Reader
                             <| stream
                             <| reader.MessageType
 
-                    return Success message
+                    return Успех message
                 with
                 | e -> 
 
-                    logException e "[%A] Exception encountered reading request body: %A" args.Request.Id e.Message
+                    журналИсключение e "[%A] Exception encountered reading request body: %A" args.Request.Id e.Message
 
                     ///TODO Standard error message for this error?
 
-                    return Failure StatusCodes.BadRequest                
+                    return Провал StatusCodes.BadRequest                
             }
 
     ///Gets the operation context for a set of arguments
@@ -107,7 +107,7 @@ module Execution =
 
             let context = 
                 {
-                    Metadata = 
+                    Метаданные = 
                         {
                             ContainerUrl = args.Container.BaseUrl;
                             EndpointName = args.Target.EndpointName;
@@ -116,74 +116,74 @@ module Execution =
                             Пользователь = args.User;
                             Resolver = args.Container.Resolver;
                         };
-                    Message = message;
+                    Сообщение = message;
                 } 
                               
             return context
         }
 
     ///Invokes the operation and returns the result
-    let asyncInvokeOperation (context : OperationContext) =
+    let asyncInvokeOperation (context : КонтекстОперации) =
         fun (args : ExecutionArgs) ->
             async {
 
-                logInfo "[%A] Invoking operation" args.Request.Id
+                журналИнфо "[%A] Invoking operation" args.Request.Id
 
                 try 
-                    return (Success (args.Target.Operation context))
+                    return (Успех (args.Target.Operation context))
                 with
                 | e ->
 
-                    logException e "[%A] An exception was encountered invoking the operation: %A" args.Request.Id e.Message
+                    журналИсключение e "[%A] An exception was encountered invoking the operation: %A" args.Request.Id e.Message
 
                     //TODO Error message to display?
 
-                    return (Failure StatusCodes.InternalServerError)
+                    return (Провал StatusCodes.InternalServerError)
             }
 
     ///Serialises the resource returned by the operation, if any
-    let asyncGetResponse (result : OperationResult) =
+    let asyncGetResponse (result : РезультатОперации) =
         fun args -> 
             async {
 
-                logInfo "[%A] Constructing operation response" args.Request.Id
+                журналИнфо "[%A] Constructing operation response" args.Request.Id
 
                 let statusCode =
-                    result.StatusCode
+                    result.КодСтатуса
                     |> someOr DefaultStatusCode
 
                 try 
                     return 
-                        match (result.Resource, args.Writer) with 
+                        match (result.Ресурс, args.Writer) with 
                         | (Some _, None) -> 
 
-                            logInfo "[%A] Response resource returned but no writer selected" args.Request.Id
+                            журналИнфо "[%A] Response resource returned but no writer selected" args.Request.Id
 
-                            Failure StatusCodes.NotAcceptable
+                            Провал StatusCodes.NotAcceptable
 
                         | (None, _) -> 
 
-                            logInfo "[%A] No response resource returned, status code is %A" args.Request.Id statusCode
+                            журналИнфо "[%A] No response resource returned, status code is %A" args.Request.Id statusCode
 
-                            Success (StatusCode statusCode, result.Headers)
+                            Успех (StatusCode statusCode, result.Заголовки)
 
                         | (Some resource, Some writer) ->
 
-                            logInfo "[%A] Response resource returned, status code is %A" args.Request.Id statusCode
+                            журналИнфо "[%A] Response resource returned, status code is %A" args.Request.Id statusCode
 
                             let bytes = 
                                 writer.Writer resource
 
-                            Success (Resource (statusCode, bytes), result.Headers)
+                            Успех (Ресурс (statusCode, bytes), result.Заголовки)
                 with
                 | e ->
 
                     
-                    logException e "[%A] Exception encountered writing response body: %A" args.Request.Id e.Message
+                    журналИсключение e "[%A] Exception encountered writing response body: %A" args.Request.Id e.Message
 
                     ///TODO Error message to display
 
-                    return Failure StatusCodes.NotAcceptable
+                    return Провал StatusCodes.NotAcceptable
             }
 
     ///Asynchronously runs the execution phase
@@ -194,7 +194,7 @@ module Execution =
 
         async {
 
-            logInfo "[%A] Beginning operation execution phase" args.Request.Id
+            журналИнфо "[%A] Beginning operation execution phase" args.Request.Id
 
             let! result =             
                 args 
@@ -205,8 +205,8 @@ module Execution =
 
             let responseType, headers = 
                 match result with
-                | Success (responseType, headers) -> (responseType, headers)
-                | Failure statusCode -> (StatusCode statusCode, [])
+                | Успех (responseType, headers) -> (responseType, headers)
+                | Провал statusCode -> (StatusCode statusCode, [])
 
             let contentType = 
                 match args.Writer with
@@ -215,8 +215,8 @@ module Execution =
 
             let response = 
                 { 
-                    ResponseType = responseType;
-                    ContentType = contentType;
+                    ТипОтвета = responseType;
+                    ТипСодержимого = contentType;
                     CustomHeaders = headers;
                 }
 

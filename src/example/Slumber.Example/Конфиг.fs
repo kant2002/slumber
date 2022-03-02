@@ -14,10 +14,10 @@ module Config =
 
             let username = 
                 request.Payload.Заголовки
-                |> Заголовки.getValue "Authorization"
+                |> Заголовки.получитьЗначение "Authorization"
 
             match username with
-            | Some username' -> Разрешено (Some { Id = username'; Properties = []; })
+            | Some username' -> Разрешено (Some { Id = username'; Свойства = []; })
             | _ -> Запрещено
 
         let createRepository () =
@@ -77,7 +77,7 @@ module Config =
                         |> supporting (delete (People.deletePerson repository))
                         |> supporting (put (People.updatePerson repository))
                     )
-                |> all (public' options Common.options)
+                |> all (public' options Общее.options)
                 |> reading МедиаТипы.Application.Json Json.read
                 |> writing МедиаТипы.Application.Json Json.write
                 |> reading МедиаТипы.Text.Xml Xml.read

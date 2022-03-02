@@ -75,7 +75,7 @@ module ``Common facts`` =
                 let urls = 
                     parseUrls request
 
-                urls.Path |> should equal "/people"
+                urls.Путь |> should equal "/people"
 
             let [<Fact>] ``Forward slash is set for root path`` () =
 
@@ -83,14 +83,14 @@ module ``Common facts`` =
                     getRequestTo "http://localhost:8080/api" "/api" "Hello, World"
                     |> parseUrls
 
-                urls.Path |> should equal "/"
+                urls.Путь |> should equal "/"
 
             let [<Fact>] ``Query is set correctly`` () =
 
                 let urls = 
                     parseUrls request
 
-                urls.Query |> List.same [ ("page", "5"); ] |> should be True
+                urls.Запрос |> List.same [ ("page", "5"); ] |> should be True
 
             let [<Fact>] ``BaseUrl is set correctly`` () =
                 
@@ -181,12 +181,12 @@ module ``Common facts`` =
 
                 let [<Fact>] ``Correct value is returned when header is present`` () =
                     headers
-                    |> Заголовки.getValue "Content-Type"
+                    |> Заголовки.получитьЗначение "Content-Type"
                     |> should be (Some' МедиаТипы.Text.Xml)
 
                 let [<Fact>] ``None is returned when header is not present`` () = 
                     headers
-                    |> Заголовки.getValue "Accept"
+                    |> Заголовки.получитьЗначение "Accept"
                     |> should be None'<String>
 
             [<Trait (Traits.Names.Module, ModuleName)>]

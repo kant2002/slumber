@@ -19,10 +19,10 @@ module Render =
         ///Writes an optional body to the given output
         let asyncWriteBody (output : IOutput) args = 
             async {
-                match args.ResponseType with
+                match args.ТипОтвета with
                 | StatusCode _ -> ()
-                | Resource (_, []) -> ()
-                | Resource (_, bytes) -> do! output.ЗаписатьТело (bytes)                    
+                | Ресурс (_, []) -> ()
+                | Ресурс (_, bytes) -> do! output.ЗаписатьТело (bytes)                    
             }     
         
         ///Writes the response headers to the given output
@@ -31,9 +31,9 @@ module Render =
             let addContentLength headers = 
 
                 let value = 
-                    match args.ResponseType with
+                    match args.ТипОтвета with
                     | StatusCode _ -> 0
-                    | Resource (_, bytes) -> List.length bytes
+                    | Ресурс (_, bytes) -> List.length bytes
                     
                 (Заголовки.ContentLength, (string value)) :: headers
 
@@ -41,7 +41,7 @@ module Render =
 
                 let currentValue = headers |> Заголовки.getContentType
 
-                match (currentValue, args.ContentType) with
+                match (currentValue, args.ТипСодержимого) with
                 | (None, Some value) -> (Заголовки.ContentType, value) :: headers
                 | _ -> headers
 
@@ -60,9 +60,9 @@ module Render =
         async {
 
             let statusCode = 
-                match response.ResponseType with
+                match response.ТипОтвета with
                 | StatusCode code -> code
-                | Resource (code, _) -> code
+                | Ресурс (code, _) -> code
 
             do!
                 Writing.asyncWriteBody 
@@ -76,7 +76,7 @@ module Render =
 
             do! output.SetStatusCode statusCode
 
-            logInfo "[%A] Response rendered, status code is %A" requestId statusCode
+            журналИнфо "[%A] Response rendered, status code is %A" requestId statusCode
         }    
 
     ///Gets the response to be rendered from the given state
@@ -89,10 +89,10 @@ module Render =
                 |> Array.toList
 
             {
-                Ответ.Empty
+                Ответ.Пустой
                 with
-                    ResponseType = Resource (StatusCodes.InternalServerError, bytes);
-                    ContentType = Some MessageContentType;
+                    ТипОтвета = Ресурс (StatusCodes.InternalServerError, bytes);
+                    ТипСодержимого = Some MessageContentType;
             }
 
         async {
@@ -100,7 +100,7 @@ module Render =
                 match state with 
                 | Running _ -> 
 
-                    logInfo "[%A] Pipeline has failed to stop," requestId
+                    журналИнфо "[%A] Pipeline has failed to stop," requestId
                 
                     getMessageResponse "Pipeline failed to stop"
 
@@ -108,13 +108,13 @@ module Render =
                     match type' with
                     | Exception e -> 
                     
-                        logInfo "[%A] Pipeline has encountered an exception" requestId
+                        журналИнфо "[%A] Pipeline has encountered an exception" requestId
                         
                         getMessageResponse e.Message
 
                     | Completed resp -> 
                     
-                        logInfo "[%A] Pipeline has completed successfully" requestId
+                        журналИнфо "[%A] Pipeline has completed successfully" requestId
                         
                         resp
         }
@@ -124,7 +124,7 @@ module Render =
         fun state ->
             async {
 
-                logInfo "[%A] Beginning render phase" requestId
+                журналИнфо "[%A] Beginning render phase" requestId
 
                 let! response = asyncGetResponse requestId state
                 do! asyncWrite requestId context response

@@ -5,7 +5,7 @@ open System.Runtime.Serialization
 open System.IO
 open System.Collections.Generic
 open Дрема
-open Дрема.Common.Операции.Метаданные
+open Дрема.Общее.Операции.Метаданные
 
 module People = 
 
@@ -69,10 +69,10 @@ module People =
         fun (id : Int32) (meta : МетаданныеОперации) ->
             try 
                 match (repository.Find id) with
-                | Some person -> OperationResult.ResourceOnly (PersonSummary.BasedOn meta.ContainerUrl person)
-                | _ -> OperationResult.StatusOnly 404        
+                | Some person -> РезультатОперации.ТолькоРесурс (PersonSummary.BasedOn meta.ContainerUrl person)
+                | _ -> РезультатОперации.ТолькоСтатус 404        
             with
-            | :? FormatException -> OperationResult.StatusOnly 400
+            | :? FormatException -> РезультатОперации.ТолькоСтатус 400
 
     let addPerson (repository : Repository.IRepository) = 
         fun (message : PersonMessage) (meta : МетаданныеОперации) ->
@@ -94,7 +94,7 @@ module People =
 
             let url =  getUrl meta.ContainerUrl (sprintf "/people/%d" person.Id)
 
-            OperationResult.ResourceOnly { Id = person.Id; Url = url; }
+            РезультатОперации.ТолькоРесурс { Id = person.Id; Url = url; }
 
     let deletePerson (repository : Repository.IRepository) =
         fun id ->
@@ -114,6 +114,6 @@ module People =
                 |> repository.Save
                 |> ignore
 
-                OperationResult.StatusOnly 200
+                РезультатОперации.ТолькоСтатус 200
 
-            | _ -> OperationResult.StatusOnly 404
+            | _ -> РезультатОперации.ТолькоСтатус 404

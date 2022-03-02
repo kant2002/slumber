@@ -4,27 +4,27 @@ open System
 
 ///Contains common modules, types and functions used by Slumber
 [<AutoOpen>]
-module Common =
+module Общее =
 
     ///Gets the ID of the executing thread
     let getThreadId () = 
         System.Threading.Thread.CurrentThread.ManagedThreadId
 
     ///Describes possible outcomes of an operation
-    type Outcome<'TSuccess, 'TFailure> = 
-        | Success of 'TSuccess
-        | Failure of 'TFailure
+    type Outcome<'ТУспех, 'ТПровал> = 
+        | Успех of 'ТУспех
+        | Провал of 'ТПровал
 
     ///Converts an optional value to a Success or Failure value with the appropriate error
-    let successOr error result = 
-        match result with 
-        | Some data -> Success data
-        | _ -> Failure error   
+    let успехИли ошибка результат = 
+        match результат with 
+        | Some данные -> Успех данные
+        | _ -> Провал ошибка   
 
     ///Record describing basic user properties
     type ДанныеПользователя = {
         Id : String;
-        Properties : (String * String) list;
+        Свойства : (String * String) list;
     }
 
     ///Contains modules for working with HTTP
@@ -116,18 +116,18 @@ module Common =
             let [<Literal>] ContentLength = "Content-Length"
 
             ///Picks the value of a header with a given key from a key/value list
-            let getValue key = 
-                List.tryPick (fun (key', value) ->
-                    if (String.same key key') then
-                        Some value
+            let получитьЗначение ключ = 
+                List.tryPick (fun (ключ', значение) ->
+                    if (String.same ключ ключ') then
+                        Some значение
                     else
                         None
                 )
 
             ///Picks a non-empty header value from a key/value list
-            let получитьНепустоеЗначение key headers = 
-                match (getValue key headers) with
-                | Some value when not (String.IsNullOrWhiteSpace value) -> Some value
+            let получитьНепустоеЗначение ключ заголовки = 
+                match (получитьЗначение ключ заголовки) with
+                | Some значение when not (String.IsNullOrWhiteSpace значение) -> Some значение
                 | _ -> None
 
             ///Gets the value of the Content-Type header from a key/value list
@@ -141,21 +141,21 @@ module Common =
         ///Represents various forms of a request URL
         type Urls = {
             Raw : Uri;
-            Path : String;
-            Query : (String * String) list;
+            Путь : String;
+            Запрос : (String * String) list;
             BaseUrl : Uri;
         } 
         with
 
             ///The empty URL collection
-            static member Empty = 
+            static member Пустые = 
 
                 let uri = Uri ("http://localhost/", UriKind.Absolute)
 
                 {
                     Raw = uri;
-                    Path = "/";
-                    Query = [];
+                    Путь = "/";
+                    Запрос = [];
                     BaseUrl = uri;
                 }
 
@@ -167,7 +167,7 @@ module Common =
         with
 
             ///The empty HTTP payload
-            static member Empty = 
+            static member Пустой = 
                 {
                     Заголовки = [];
                     Тело = None;
@@ -184,32 +184,32 @@ module Common =
         with
 
             ///The empty HTTP request
-            static member Empty = 
+            static member Пустой = 
                 {
                     Id = Guid.Empty;
-                    Url = Urls.Empty;
+                    Url = Urls.Пустые;
                     Verb = String.Empty;
-                    Payload = Payload.Empty;
+                    Payload = Payload.Пустой;
                 }
 
         ///Describes possible response types
-        type ResponseType =
+        type ТипОтвета =
             | StatusCode of Int32
-            | Resource of (Int32 * Byte list)
+            | Ресурс of (Int32 * Byte list)
 
         ///Describes an HTTP response
         type Ответ = {
-            ResponseType : ResponseType;
-            ContentType : String option;
+            ТипОтвета : ТипОтвета;
+            ТипСодержимого : String option;
             CustomHeaders : (String * String) list;
         }
         with
 
             ///The empty response
-            static member Empty =
+            static member Пустой =
                 {
-                    ResponseType = (StatusCode StatusCodes.NotImplemented);
-                    ContentType = None;
+                    ТипОтвета = (StatusCode StatusCodes.NotImplemented);
+                    ТипСодержимого = None;
                     CustomHeaders = [];
                 }
 
@@ -222,7 +222,7 @@ module Common =
         ///Wraps a raw HTTP response in the IOutput interface
         type HttpResponseOutput (raw : HttpResponseBase) = 
 
-            static member Create raw = 
+            static member Создать raw = 
                 HttpResponseOutput (raw) :> IOutput
 
             interface IOutput with
@@ -251,15 +251,15 @@ module Common =
             let root = 
                 Uri (raw.Url.GetLeftPart (UriPartial.Authority), UriKind.Absolute)
 
-            let path = 
+            let путь = 
                 match (raw.Url.AbsolutePath.Substring (raw.ApplicationPath.Length)) with
                 | "" -> "/"
                 | p -> p
 
             {
                 Raw = raw.Url;                
-                Path = path;
-                Query = raw.QueryString |> NameValueCollection.toList;
+                Путь = путь;
+                Запрос = raw.QueryString |> NameValueCollection.toList;
                 BaseUrl = Uri (root, raw.ApplicationPath);
             }
 
@@ -298,7 +298,7 @@ module Common =
             ///HTTP response extension methods
             type HttpResponseBase with
                 member this.AsOutput () = 
-                    HttpResponseOutput.Create this
+                    HttpResponseOutput.Создать this
 
             ///HTTP context extension methods
             type HttpContextBase with
@@ -358,7 +358,7 @@ module Common =
                 {
                     ContainerUrl = Uri (DefaultUrl, UriKind.Absolute);
                     EndpointName = String.Empty;
-                    Запрос = Запрос.Empty;
+                    Запрос = Запрос.Пустой;
                     Параметры = [];
                     Пользователь = None;
                     Resolver = None;
@@ -369,166 +369,166 @@ module Common =
         module Метаданные = 
 
             ///Union describing the result of trying to get some metadata
-            type TryGetResult<'TFound> = 
-                | Found of 'TFound
-                | Missing
+            type TryGetResult<'ТНайдено> = 
+                | Найдно of 'ТНайдено
+                | Отсутствует
                 | Malformed
 
-            let private pickValue key =
-                fun (key', value) ->
-                    if (String.same key key') then
-                        Some value
+            let private выбратьЗначение ключ =
+                fun (ключ', значение) ->
+                    if (String.same ключ ключ') then
+                        Some значение
                     else
                         None
 
             ///Gets the parameters from metadata
-            let getParameters meta = 
+            let получитьПараметры meta = 
                 meta.Параметры
 
             ///Gets the value of a parameter
-            let getParameter key = 
-                getParameters
-                >> List.pick (pickValue key)
+            let получитьПараметр ключ = 
+                получитьПараметры
+                >> List.pick (выбратьЗначение ключ)
 
             ///Tries to get the value of a parameter
-            let tryGetParameter key = 
-                getParameters
-                >> List.tryPick (pickValue key)
+            let попробоватьПолучитьПараметр ключ = 
+                получитьПараметры
+                >> List.tryPick (выбратьЗначение ключ)
 
             ///Gets a parameter as the given type
-            let getParameterAs<'TResult> key meta = 
+            let получитьПараметрКак<'ТРезультат> ключ мета = 
                 
                 let value = 
-                    getParameter key meta
+                    получитьПараметр ключ мета
 
-                Convert.ChangeType (value, typeof<'TResult>) :?> 'TResult
+                Convert.ChangeType (value, typeof<'ТРезультат>) :?> 'ТРезультат
 
             ///Tries to get a parameter as a given type
-            let tryGetParameterAs<'TResult> key meta = 
-                match (tryGetParameter key meta) with
-                | None -> Missing
+            let попробоватьПолучитьПараметрКак<'ТРезультат> ключ мета = 
+                match (попробоватьПолучитьПараметр ключ мета) with
+                | None -> Отсутствует
                 | Some value ->
                     try
-                        Found (Convert.ChangeType (value, typeof<'TResult>) :?> 'TResult)
+                        Найдно (Convert.ChangeType (value, typeof<'ТРезультат>) :?> 'ТРезультат)
                     with
                     | _ -> Malformed
 
             ///Gets a parameter using the given conversion
-            let getParameterUsing key (conversion : String -> 'TResult) =                 
-                getParameter key
-                >> conversion
+            let получитьПараметрИспользуя ключ (конвертация : String -> 'ТРезультат) =                 
+                получитьПараметр ключ
+                >> конвертация
 
             ///Tries to gets a parameter using a given conversion
-            let tryGetParameterUsing key (conversion : String -> 'TResult) meta = 
-                match (tryGetParameter key meta) with
-                | None -> Missing
-                | Some value ->
+            let попробоватьПолучитьПараметрИспользуя ключ (конвертация : String -> 'TResult) мета = 
+                match (попробоватьПолучитьПараметр ключ мета) with
+                | None -> Отсутствует
+                | Some значение ->
                     try
-                        value
-                        |> conversion
-                        |> Found
+                        значение
+                        |> конвертация
+                        |> Найдно
                     with
                     | _ -> Malformed
 
         ///Represents the context in which an operation is executed
-        type OperationContext = {
-            Metadata : МетаданныеОперации;
-            Message : obj option;
+        type КонтекстОперации = {
+            Метаданные : МетаданныеОперации;
+            Сообщение : obj option;
         }      
         with
 
             ///The empty context
             static member Empty = 
                 {
-                    Metadata = МетаданныеОперации.Пустые;
-                    Message = None;
+                    Метаданные = МетаданныеОперации.Пустые;
+                    Сообщение = None;
                 }  
 
         ///Record describing the result of an operation
-        type OperationResult = {
-            StatusCode : Int32 option;
-            Resource : obj option;
-            Headers : (String * String) list;
+        type РезультатОперации = {
+            КодСтатуса : Int32 option;
+            Ресурс : obj option;
+            Заголовки : (String * String) list;
         }
         with
 
             ///The empty result
-            static member Empty = 
+            static member Пустой = 
                 {
-                    StatusCode = None;
-                    Resource = None;
-                    Headers = [];
+                    КодСтатуса = None;
+                    Ресурс = None;
+                    Заголовки = [];
                 }
 
             ///Creates a result with only a status code
-            static member StatusOnly (statusCode, headers) = 
+            static member ТолькоСтатус (кодСтатуса, заголовки) = 
                 {
-                    StatusCode = (Some statusCode);
-                    Resource = None;
-                    Headers = headers;
+                    КодСтатуса = (Some кодСтатуса);
+                    Ресурс = None;
+                    Заголовки = заголовки;
                 }
 
             ///Creates a result with only a status code
-            static member StatusOnly statusCode = 
-                OperationResult.StatusOnly (statusCode, [])
+            static member ТолькоСтатус кодСтатуса = 
+                РезультатОперации.ТолькоСтатус (кодСтатуса, [])
 
             ///Creates a result with only a resource
-            static member ResourceOnly (resource, headers) = 
+            static member ТолькоРесурс (ресурс, заголовки) = 
                 {
-                    StatusCode = None;
-                    Resource = (Some resource);
-                    Headers = headers;
+                    КодСтатуса = None;
+                    Ресурс = (Some ресурс);
+                    Заголовки = заголовки;
                 }
 
             ///Creates a result with only a resource
-            static member ResourceOnly resource = 
-                OperationResult.ResourceOnly (resource, [])
+            static member ТолькоРесурс ресурс = 
+                РезультатОперации.ТолькоРесурс (ресурс, [])
 
             ///Creates a result with body a status code and a resource
-            static member Both (statusCode, resource, headers) = 
+            static member Оба (кодСтатуса, ресурс, заголовки) = 
                 {
-                    StatusCode = (Some statusCode);
-                    Resource = (Some resource);
-                    Headers = headers;
+                    КодСтатуса = (Some кодСтатуса);
+                    Ресурс = (Some ресурс);
+                    Заголовки = заголовки;
                 }
 
             ///Creates a result with body a status code and a resource
-            static member Both (statusCode, resource) = 
-                OperationResult.Both (statusCode, resource, [])
+            static member Оба (кодСтатуса, ресурс) = 
+                РезультатОперации.Оба (кодСтатуса, ресурс, [])
 
         ///Type alias describing the signature for operations
-        type Operation = OperationContext -> OperationResult
+        type Операция = КонтекстОперации -> РезультатОперации
 
     ///Contains a monad similar to maybe which can be used to escape function chains on exceptions
-    module Attempt = 
+    module Попытка = 
 
         ///Contains the main monad functions for attempt
-        module Monad = 
+        module Монада = 
 
             ///Binds two synchronous functions together, calling g if f succeeds. 
-            let bind f g = 
-                fun state ->
-                    match (f state) with
-                    | Success value -> g value state
-                    | Failure data -> Failure data
+            let связать f g = 
+                fun состояние ->
+                    match (f состояние) with
+                    | Успех значение -> g значение состояние
+                    | Провал данные -> Провал данные
 
             ///Lifts a value to the success state
-            let return' value =             
+            let вернуть' value =             
                 fun _ ->
-                    Success value
+                    Успех value
 
         ///Workflow for the attempt monad
-        type AttemptBuilder () = 
+        type СтроительПопыток () = 
             
-            member this.Bind (expr, rest) = 
-                Monad.bind expr rest
+            member this.Bind (выраж, остаток) = 
+                Монада.связать выраж остаток
 
-            member this.Return expr = 
-                Monad.return' expr
+            member this.Вернуть выраж = 
+                Монада.вернуть' выраж
 
         //Syntactic sugar for the attempt workflow
-        let attempt = 
-            AttemptBuilder ()       
+        let попытка = 
+            СтроительПопыток ()       
 
     ///Asynchronous version of the Attempt monad and workflow
     module AsyncAttempt = 
@@ -536,7 +536,7 @@ module Common =
         ///Contains the monad functions for the aysnc attempt workflow
         module Monad = 
 
-            open Attempt
+            open Попытка
 
             ///Binds two asynchrounous functions together, calling g if f succeeds
             let bind f g = 
@@ -546,17 +546,17 @@ module Common =
                         let! result = f state
 
                         match result with
-                        | Success value -> 
+                        | Успех value -> 
                             return! g value state
-                        | Failure data -> 
-                            return (Failure data)
+                        | Провал data -> 
+                            return (Провал data)
                     }
 
             ///Lifts a value to an asynchronous success state
             let return' value = 
                 fun _ -> 
                     async {
-                        return (Success value)
+                        return (Успех value)
                     }
 
         ///Workflow for the async attempt monad
@@ -572,7 +572,7 @@ module Common =
         let getState () =
             fun state ->
                 async {
-                    return (Success state)
+                    return (Успех state)
                 }
 
         //Syntactic sugar for the asycn attempt workflow

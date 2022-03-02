@@ -4,7 +4,7 @@ open System
 open System.Web
 open Дрема.Framework
 open Дрема.Discovery
-open Дрема.Common.Http
+open Дрема.Общее.Http
 
 ///Contains functions used to parse the raw HTTP request and initialise Slumber's configuration
 module Bootstrap = 
@@ -19,7 +19,7 @@ module Bootstrap =
                 | Implicit -> "implicit"
                 | Mixed _ -> "mixed"
 
-            logInfo "[%A] Bootstrapping using %A" request.Id mode'
+            журналИнфо "[%A] Bootstrapping using %A" request.Id mode'
 
             let container = 
                 match mode with

@@ -10,7 +10,7 @@ module Pipeline =
     ///Runs the standard Slumber pipeline asynchronously
     let asyncRun mode (input : Запрос) (output : IOutput) = 
 
-        logInfo "[%A] Pipeline begins for request to %A" input.Id input.Url.Raw.AbsoluteUri
+        журналИнфо "[%A] Pipeline begins for request to %A" input.Id input.Url.Raw.AbsoluteUri
 
         let execute = 
             start

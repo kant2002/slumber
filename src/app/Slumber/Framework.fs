@@ -6,51 +6,51 @@ open System
 module Framework =
 
     ///Contains functions and types for serialising and deserialising request and response bodies
-    module MessageIO = 
+    module ВВСообщений = 
 
         open System.IO
 
         ///Type alias for the signature of deserialisers
-        type Reader = Stream -> Type -> obj option
+        type Читатель = Stream -> Type -> obj option
 
         ///Type alias for the signature of serialisers
-        type Writer = obj -> byte list
+        type Писатель = obj -> byte list
 
 
     ///Contains core types and functions used by Slumber
     [<AutoOpen>]
-    module Core = 
+    module Ядро = 
 
         let [<Literal>] DefaultUrl = "http://localhost/"
 
         ///Union describing possible security modes
-        type SecurityMode =
+        type РежимБезопасности =
             | Public
             | Private
         
         ///Represents a verb bound operation binding
-        type Binding = {
+        type Привязка = {
             Verb : String;
-            MessageType : Type option;
-            Operation : Operation;
-            SecurityMode : SecurityMode option;
+            ТипСообщения : Type option;
+            Операция : Операция;
+            РежимБезопасности : РежимБезопасности option;
         }          
         with
 
             ///The empty binding
-            static member Empty =
+            static member Пустая =
                 {
                     Verb = String.Empty;
-                    MessageType = None;
-                    Operation = (fun _ -> OperationResult.Empty);
-                    SecurityMode = None;
+                    ТипСообщения = None;
+                    Операция = (fun _ -> РезультатОперации.Пустой);
+                    РежимБезопасности = None;
                 }
 
         ///Represents a URL bound endpoint exposing zero or more operations
         type Endpoint = {
             Название : String;
             Шаблон : String;
-            Bindings : Binding list;
+            Привязки : Привязка list;
         }
         with
 
@@ -59,22 +59,22 @@ module Framework =
                 {
                     Название = String.Empty;
                     Шаблон = String.Empty;
-                    Bindings = [];
+                    Привязки = [];
                 }    
 
         ///Represents supported content types 
-        type IOConfig = {
-            Readers : (String * MessageIO.Reader) list;
-            Writers : (String * MessageIO.Writer) list;
+        type КонфигВВ = {
+            Читатели : (String * ВВСообщений.Читатель) list;
+            Писатели : (String * ВВСообщений.Писатель) list;
             ПеренаправляемыеТипы : (String * String) list;
         }
         with
 
             ///The empty content types selection
-            static member Empty = 
+            static member Пустой = 
                 {
-                    Readers = [];
-                    Writers = [];
+                    Читатели = [];
+                    Писатели = [];
                     ПеренаправляемыеТипы = [];
                 }        
 
@@ -84,9 +84,9 @@ module Framework =
             | Запрещено        
 
         ///Represents the security configuration of a container
-        type SecurityConfig = {
-            DefaultMode : SecurityMode;
-            Authenticate : (Запрос -> РезультатАвторизации) option;
+        type КонфигБезопасности = {
+            DefaultMode : РежимБезопасности;
+            Авторизовать : (Запрос -> РезультатАвторизации) option;
         }
         with
 
@@ -94,26 +94,26 @@ module Framework =
             static member Default = 
                 {
                     DefaultMode = Public;
-                    Authenticate = None;
+                    Авторизовать = None;
                 }
 
         ///Represents a collection of endpoints and associated configuration data
         type Контейнер = {
             Endpoints : Endpoint list;
-            IO : IOConfig;
+            ВВ : КонфигВВ;
             BaseUrl : Uri;
-            Security : SecurityConfig;
+            Security : КонфигБезопасности;
             Resolver : Resolver option;
         }
         with
 
             ///The empty container
-            static member Empty = 
+            static member Пустой = 
                 {
                     Endpoints = [];
-                    IO = IOConfig.Empty;
+                    ВВ = КонфигВВ.Пустой;
                     BaseUrl = Uri (DefaultUrl, UriKind.Absolute);
-                    Security = SecurityConfig.Default;
+                    Security = КонфигБезопасности.Default;
                     Resolver = None;
                 }
 
@@ -140,11 +140,11 @@ module Framework =
 
             ///Gets the container's IO configuration
             let getIO container = 
-                container.IO
+                container.ВВ
 
             ///Gets the readers configured for a container
             let getReaders container = 
-                container.IO.Readers
+                container.ВВ.Читатели
 
             let private getMessageIO contentType = 
                 List.tryPick (fun (contentType', io) ->
@@ -156,28 +156,28 @@ module Framework =
 
             ///Gets the reader for the given content type
             let getReader contentType container = 
-                container.IO.Readers
+                container.ВВ.Читатели
                 |> getMessageIO contentType
 
             ///Gets the writers configured for a container
             let getWriters container = 
-                container.IO.Writers
+                container.ВВ.Писатели
 
             ///Gets the writer for the given content type
             let getWriter contentType container = 
-                container.IO.Writers
+                container.ВВ.Писатели
                 |> getMessageIO contentType
 
             ///True if a type is forwarded
             let isForwarded contentType container = 
-                container.IO.ПеренаправляемыеТипы
+                container.ВВ.ПеренаправляемыеТипы
                 |> List.exists (fst >> String.same contentType)
 
             ///Applies forwarding to a content type, returning the fowrarded type if one is configured
             let applyForwarding contentType container = 
 
                 let forwardedType = 
-                    container.IO.ПеренаправляемыеТипы
+                    container.ВВ.ПеренаправляемыеТипы
                     |> List.tryPick (fun (from, to') ->
                             if (String.same from contentType) then
                                 Some to'
@@ -216,11 +216,11 @@ module Framework =
 
             ///Gets an endpoint's binding collection
             let getBindings endpoint =
-                endpoint.Bindings
+                endpoint.Привязки
 
             ///Tries to get a binding by verb
             let tryGetBinding verb endpoint =
-                endpoint.Bindings
+                endpoint.Привязки
                 |> List.tryFind (fun binding ->
                         String.same verb binding.Verb
                     )
@@ -291,8 +291,8 @@ module Framework =
         ///Stops execution of the pipline with the given status code
         let stopWithStatus statusCode = 
             {
-                ResponseType = (StatusCode statusCode);
-                ContentType = None;
+                ТипОтвета = (StatusCode statusCode);
+                ТипСодержимого = None;
                 CustomHeaders = [];
             }
             |> Completed

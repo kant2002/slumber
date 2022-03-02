@@ -15,7 +15,7 @@
     <Compile Include="..\AssemblyInfo.Common.fs">
       <Link>AssemblyInfo.Common.fs</Link>
     </Compile>
-    <Compile Include="Common.fs" />
+    <Compile Include="Общее.fs" />
     <Compile Include="Протоколирование.fs" />
     <Compile Include="Framework.fs" />
     <Compile Include="Render.fs" />

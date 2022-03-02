@@ -3,7 +3,7 @@
 open System
 open System.IO
 open System.Runtime.Serialization
-open Дрема.Framework.MessageIO
+open Дрема.Framework.ВВСообщений
 
 module DataContract = 
 

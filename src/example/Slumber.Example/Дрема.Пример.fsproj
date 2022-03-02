@@ -4,7 +4,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
   <ItemGroup>
-    <Compile Include="Common.fs" />
+    <Compile Include="Общее.fs" />
     <Compile Include="Репозиторий.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Люди.fs" />

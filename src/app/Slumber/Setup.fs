@@ -128,7 +128,7 @@ module Setup =
         let getArgumentValue context argType =
 
             let getMessage isOptional messageType = 
-                match context.Message with
+                match context.Сообщение with
                 | None -> 
                     if (not isOptional) then
                         raise (FormatException ("A message is required but is not present."))
@@ -144,9 +144,9 @@ module Setup =
             let getParameter isOptional name parameterType = 
 
                 let value = 
-                    match (tryGetParameter name context.Metadata) with
+                    match (попробоватьПолучитьПараметр name context.Метаданные) with
                     | None -> 
-                        context.Metadata.Запрос.Url.Query
+                        context.Метаданные.Запрос.Url.Запрос
                         |> List.tryPick (fun (key, value) ->
                                 if (String.same key name) then
                                     Some value
@@ -176,7 +176,7 @@ module Setup =
                         value'
 
             let getDependency isOptional dependencyType = 
-                match (context.Metadata.Resolve dependencyType) with
+                match (context.Метаданные.Resolve dependencyType) with
                 | Some value ->
                     if isOptional then
                         makeSome dependencyType value
@@ -190,7 +190,7 @@ module Setup =
 
             match argType with
             | Unit' -> box ()
-            | Metadata -> box context.Metadata
+            | Metadata -> box context.Метаданные
             | Message (isOptional, messageType) -> getMessage isOptional messageType
             | Parameter (name, isOptional, parameterType) -> getParameter isOptional name parameterType
             | Dependency (isOptional, dependencyType) -> getDependency isOptional dependencyType
@@ -224,7 +224,7 @@ module Setup =
                 
                     Void
 
-                else if (isType<OperationResult> summary.BaseType) then
+                else if (isType<РезультатОперации> summary.BaseType) then
 
                     if summary.IsOptional then
                         invalidSetup "Optional OperationResult is not supported."
@@ -285,8 +285,8 @@ module Setup =
                 | _ -> value
 
             match returnType with
-            | Void -> OperationResult.Empty
-            | Result -> value' :?> OperationResult
+            | Void -> РезультатОперации.Пустой
+            | Result -> value' :?> РезультатОперации
             | Resource (isOptional, resourceType) ->
 
                 let resource = 
@@ -295,7 +295,7 @@ module Setup =
                     else
                         Some value'
 
-                { OperationResult.Empty with Resource = resource; }
+                { РезультатОперации.Пустой with Ресурс = resource; }
 
         ///Binds a target to the given verb
         let bind verb target = 
@@ -312,7 +312,7 @@ module Setup =
                     let messageType = getMessageType argTypes
                     let returnType = getReturnType method'
 
-                    let op (context : OperationContext) =
+                    let op (context : КонтекстОперации) =
                         try 
 
                             let argValues = getArgumentValues context argTypes
@@ -325,16 +325,16 @@ module Setup =
                         with
                         | :? FormatException as e ->
 
-                            logException e "Request was not valid"
+                            журналИсключение e "Request was not valid"
 
-                            OperationResult.StatusOnly StatusCodes.BadRequest
+                            РезультатОперации.ТолькоСтатус StatusCodes.BadRequest
 
                     {
-                        Binding.Empty 
+                        Привязка.Пустая 
                         with
-                            MessageType = messageType;
+                            ТипСообщения = messageType;
                             Verb = verb;
-                            Operation = op;
+                            Операция = op;
                     }
 
                 | _ -> invalidOp "Could not locate Invoke method on function type."                
@@ -369,17 +369,17 @@ module Setup =
 
         ///Creates a public binding
         let public' binder f = 
-            { (binder f) with SecurityMode = (Some Public); }
+            { (binder f) with РежимБезопасности = (Some Public); }
 
         ///Creates a privte binding
         let private' binder f = 
-            { (binder f) with SecurityMode = (Some Private); }
+            { (binder f) with РежимБезопасности = (Some Private); }
 
     ///Contains functions for creating endpoints
     [<AutoOpen>]
     module Endpoints = 
 
-        open Дрема.Framework.Core.Endpoints
+        open Дрема.Framework.Ядро.Endpoints
 
         ///Creates an endpoint for the given URI template
         let endpointAt template = 
@@ -395,14 +395,14 @@ module Setup =
             { endpoint with Название = name; }
 
         ///Adds a binding to an endpoint
-        let supporting (binding : Binding) endpoint =
+        let supporting (binding : Привязка) endpoint =
             match (tryGetBinding binding.Verb endpoint) with
             | Some _ -> invalidSetup (String.Format ("The verb {0} is already bound for endpoint at {1}", binding.Verb, endpoint.Шаблон))
             | _ -> 
                 { 
                     endpoint 
                     with 
-                        Bindings = (binding :: endpoint.Bindings); 
+                        Привязки = (binding :: endpoint.Привязки); 
                 }
 
     ///Contains functions for creating containers
@@ -410,7 +410,7 @@ module Setup =
     module Containers = 
 
         open System.Web
-        open Дрема.Framework.Core.Containers
+        open Дрема.Framework.Ядро.Containers
 
         ///Creates an absolute URI
         let absoluteUri (uri : String) = 
@@ -427,7 +427,7 @@ module Setup =
                 raise (NotSupportedException ("Relative base URLs are not supported. Consider using the relativeUrl function to create an absolute URL."))
 
             {
-                Контейнер.Empty
+                Контейнер.Пустой
                 with
                     BaseUrl = uri;
             }
@@ -436,7 +436,7 @@ module Setup =
         let authenticatedBy f privateByDefault container = 
 
             let setAuthenticate security = 
-                { security with Authenticate = (Some f); }
+                { security with Авторизовать = (Some f); }
 
             let setPrivacy security = 
 
@@ -492,12 +492,12 @@ module Setup =
             | _ ->
                 let io = 
                     {
-                        container.IO
+                        container.ВВ
                         with
-                            Readers = ((contentType, reader) :: container.IO.Readers);
+                            Читатели = ((contentType, reader) :: container.ВВ.Читатели);
                     }
 
-                { container with IO = io; }
+                { container with ВВ = io; }
 
         ///Adds a writer to a container
         let writing (contentType : String) writer container = 
@@ -506,12 +506,12 @@ module Setup =
             | _ ->
                 let io = 
                     {
-                        container.IO
+                        container.ВВ
                         with
-                            Writers = ((contentType, writer) :: container.IO.Writers);
+                            Писатели = ((contentType, writer) :: container.ВВ.Писатели);
                     }
 
-                { container with IO = io; }
+                { container with ВВ = io; }
 
         ///Sets up content type forwarding
         let forwarding (fromContentType : String) (toContentType : String) container = 
@@ -521,16 +521,16 @@ module Setup =
                 {
                     container
                     with 
-                        IO = 
+                        ВВ = 
                             {
-                                container.IO
+                                container.ВВ
                                 with
-                                    ПеренаправляемыеТипы = (fromContentType, toContentType) :: container.IO.ПеренаправляемыеТипы;
+                                    ПеренаправляемыеТипы = (fromContentType, toContentType) :: container.ВВ.ПеренаправляемыеТипы;
                             }
                 }    
 
         ///Applies a binding to all endpoints
-        let all (binding : Binding) (container : Контейнер) = 
+        let all (binding : Привязка) (container : Контейнер) = 
 
             let verbAlreadyUsed = 
                 container.Endpoints
@@ -546,7 +546,7 @@ module Setup =
                         {
                             endpoint
                             with
-                                Bindings = binding :: endpoint.Bindings;
+                                Привязки = binding :: endpoint.Привязки;
                         }
                     )
 
