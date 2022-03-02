@@ -7,15 +7,15 @@ open log4net
 open log4net.Config
 open Дрема.Протоколирование
 
-type App () = 
+type Приложение () = 
     inherit HttpApplication ()
 
-    let [<Literal>] LogName = "Slumber.log"
+    let [<Literal>] ИмяЛога = "Slumber.log"
 
-    static let mutable _initialised = false
+    static let mutable _инициализировано = false
 
     ///Sets up log4net logging
-    let configureLogging () = 
+    let настроитьЖурналирование () = 
 
         XmlConfigurator.Configure (
             new FileInfo ( 
@@ -28,29 +28,29 @@ type App () =
         |> ignore
 
         let log = 
-            LogManager.GetLogger LogName
+            LogManager.GetLogger ИмяЛога
 
-        установитьПисательЖурнала (fun entry ->
-            match entry with
-            | Отладка msg -> 
+        установитьПисательЖурнала (fun запись ->
+            match запись with
+            | Отладка сообщ -> 
                 if log.IsDebugEnabled then
-                    log.Debug (msg)
-            | Информация msg ->
+                    log.Debug (сообщ)
+            | Информация сообщ ->
                 if log.IsInfoEnabled then
-                    log.Info (msg)
-            | Предупреждение msg ->
+                    log.Info (сообщ)
+            | Предупреждение сообщ ->
                 if log.IsWarnEnabled then
-                    log.Warn (msg)
-            | Ошибка (msg, err) ->
+                    log.Warn (сообщ)
+            | Ошибка (сообщ, ошиб) ->
                 if log.IsErrorEnabled then
-                    match err with 
-                    | Some ex ->  log.Error (msg, ex)
-                    | _ -> log.Error (msg)
+                    match ошиб with 
+                    | Some искл ->  log.Error (сообщ, искл)
+                    | _ -> log.Error (сообщ)
         )
 
     member this.Application_Start (_ : obj, _ : EventArgs) =
-        if (not _initialised) then
+        if (not _инициализировано) then
 
-            _initialised <- true
+            _инициализировано <- true
 
-            configureLogging ()
+            настроитьЖурналирование ()

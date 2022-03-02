@@ -224,14 +224,14 @@ module ``Render facts`` =
             | Ресурс (statusCode, _) -> statusCode
 
         let [<Fact>] ``Running state returns HTTP 500`` () =
-            Running (10) |> getResponse |> getStatusCode |> should equal StatusCodes.InternalServerError
+            Запущен (10) |> getResponse |> getStatusCode |> should equal StatusCodes.InternalServerError
 
         let [<Fact>] ``Stopped (exception) state returns HTTP 500`` () = 
-            Stopped (Exception (new NotSupportedException ())) |> getResponse |> getStatusCode |> should equal StatusCodes.InternalServerError
+            Остановлен (Исключение (new NotSupportedException ())) |> getResponse |> getStatusCode |> should equal StatusCodes.InternalServerError
 
         let [<Fact>] ``Stopped (completed) state returns response`` () = 
 
             let response = 
                 { Ответ.Пустой with ТипОтвета = StatusCode (418); }
 
-            Stopped (Completed response) |> getResponse |> getStatusCode |> should equal 418
+            Остановлен (Завершено response) |> getResponse |> getStatusCode |> should equal 418

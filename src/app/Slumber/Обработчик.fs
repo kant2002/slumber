@@ -15,7 +15,7 @@ type SlumberHandler () =
             let input = wrapped.GetInput id
             let output = wrapped.GetOutput ()
 
-            Pipeline.run
+            Конвейер.run
             <| Implicit
             <| input
             <| output

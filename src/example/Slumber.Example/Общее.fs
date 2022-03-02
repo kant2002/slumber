@@ -11,7 +11,7 @@ module Общее =
 
         let endpoint = 
             meta.ContainerUrl
-            |> ImplicitConfiguration.get
+            |> НеявнаяКонфигурация.получить
             |> tryGetEndpointByName meta.EndpointName
             |> Option.get
 

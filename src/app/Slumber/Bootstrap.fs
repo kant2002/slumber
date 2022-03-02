@@ -1,7 +1,5 @@
 ﻿namespace Дрема
 
-open System
-open System.Web
 open Дрема.Framework
 open Дрема.Discovery
 open Дрема.Общее.Http
@@ -10,37 +8,37 @@ open Дрема.Общее.Http
 module Bootstrap = 
 
     ///Runs the bootstrapping phase asynchronously
-    let asyncRun mode (request : Запрос) =
+    let asyncRun режим (запрос : Запрос) =
         async {
 
             let mode' = 
-                match mode with
+                match режим with
                 | Explicit _ -> "explicit"
                 | Implicit -> "implicit"
                 | Mixed _ -> "mixed"
 
-            журналИнфо "[%A] Bootstrapping using %A" request.Id mode'
+            журналИнфо "[%A] Bootstrapping using %A" запрос.Id mode'
 
-            let container = 
-                match mode with
-                | Explicit container' -> container'
-                | Implicit -> ImplicitConfiguration.get request.Url.BaseUrl
+            let контейнер = 
+                match режим with
+                | Explicit контейнер' -> контейнер'
+                | Implicit -> НеявнаяКонфигурация.получить запрос.Url.BaseUrl
                 | Mixed modifier -> 
-                    request.Url.BaseUrl
-                    |> ImplicitConfiguration.get
+                    запрос.Url.BaseUrl
+                    |> НеявнаяКонфигурация.получить
                     |> modifier
 
             return 
                 {
-                    Запрос = request;
-                    Контейнер = container;
+                    Запрос = запрос;
+                    Контейнер = контейнер;
                 }
-                |> Running
+                |> Запущен
         }
 
     ///Runs the bootstrapping phase synchronously
-    let run mode request = 
-        asyncRun mode request
+    let run режим запрос = 
+        asyncRun режим запрос
         |> Async.RunSynchronously
     
         

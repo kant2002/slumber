@@ -75,7 +75,7 @@ module ``Discovery facts`` =
                     {
                         Контейнер.Пустой
                         with
-                            Endpoints = [ endpoint; ];
+                            ОконечныеТочки = [ endpoint; ];
                             ВВ = 
                                 {
                                     КонфигВВ.Пустой
@@ -83,7 +83,7 @@ module ``Discovery facts`` =
                                         Читатели = [ (МедиаТипы.Text.Xml, читатель); (МедиаТипы.Application.Json, читатель) ];
                                         Писатели = [ (МедиаТипы.Text.Xml, писатель); (МедиаТипы.Application.Json, писатель) ];
                                 }
-                            BaseUrl = baseUrl;
+                            БазовыйУрл = baseUrl;
                     }
             }
 
@@ -679,9 +679,9 @@ module ``Discovery facts`` =
 
             let isNotSupported state = 
                 match state with
-                | Stopped stopType -> 
+                | Остановлен stopType -> 
                     match stopType with
-                    | Completed response ->
+                    | Завершено response ->
                         match response.ТипОтвета with
                         | StatusCode statusCode -> statusCode = StatusCodes.ContentTypeNotSupported
                         | _ -> false
@@ -698,7 +698,7 @@ module ``Discovery facts`` =
 
             let hasNoReader state = 
                 match state with
-                | Running (args : Execution.ExecutionArgs) -> Option.isNone args.Reader
+                | Запущен (args : Execution.ExecutionArgs) -> Option.isNone args.Reader
                 | _ -> false
 
             let setBinding args = 
@@ -707,7 +707,7 @@ module ``Discovery facts`` =
                     get (fun () -> "Hello, World")
 
                 let container = 
-                    { args.Контейнер with Endpoints = [ { endpoint with Привязки = [ binding; ]; } ]; }
+                    { args.Контейнер with ОконечныеТочки = [ { endpoint with Привязки = [ binding; ]; } ]; }
 
                 { args with Контейнер = container; }
 
@@ -721,7 +721,7 @@ module ``Discovery facts`` =
             
             let isReaderCorrect state = 
                 match state with
-                | Running (args : Execution.ExecutionArgs) -> 
+                | Запущен (args : Execution.ExecutionArgs) -> 
                     match args.Reader with
                     | Some reader -> 
                         reader.ContentType = DefaultMediaType
@@ -738,7 +738,7 @@ module ``Discovery facts`` =
             
             let isWriterCorrect state = 
                 match state with
-                | Running (args : Execution.ExecutionArgs) ->
+                | Запущен (args : Execution.ExecutionArgs) ->
                     match args.Writer with
                     | Some writer -> writer.ContentType = DefaultMediaType
                     | _ -> false
@@ -753,9 +753,9 @@ module ``Discovery facts`` =
 
             let isUnauthorised' state = 
                 match state with
-                | Stopped stopType ->
+                | Остановлен stopType ->
                     match stopType with
-                    | Completed response ->
+                    | Завершено response ->
                         match response.ТипОтвета with
                         | StatusCode statusCode -> statusCode = StatusCodes.Unauthorised
                         | _ -> false
@@ -772,7 +772,7 @@ module ``Discovery facts`` =
             
             let hasUserDetails state = 
                 match state with
-                | Running (args : Execution.ExecutionArgs) -> 
+                | Запущен (args : Execution.ExecutionArgs) -> 
                     match args.User with
                     | Some data -> data.Id = "user.name"
                     | _ -> false

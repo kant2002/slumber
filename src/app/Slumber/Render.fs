@@ -98,21 +98,21 @@ module Render =
         async {
             return 
                 match state with 
-                | Running _ -> 
+                | Запущен _ -> 
 
                     журналИнфо "[%A] Pipeline has failed to stop," requestId
                 
                     getMessageResponse "Pipeline failed to stop"
 
-                | Stopped type' ->
+                | Остановлен type' ->
                     match type' with
-                    | Exception e -> 
+                    | Исключение e -> 
                     
                         журналИнфо "[%A] Pipeline has encountered an exception" requestId
                         
                         getMessageResponse e.Message
 
-                    | Completed resp -> 
+                    | Завершено resp -> 
                     
                         журналИнфо "[%A] Pipeline has completed successfully" requestId
                         

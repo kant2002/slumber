@@ -14,37 +14,37 @@ module People =
         |> string
 
     [<AutoOpen>]
-    module Model = 
+    module Модель = 
 
         [<DataContract (Name = "person-summary", Namespace = "")>]
         type PersonSummary = {
             [<field: DataMember (Name = "id")>] Id : Int32;
             [<field: DataMember (Name = "full-name")>] FullName : String;
-            [<field: DataMember (Name = "age")>] Age : Int32;
+            [<field: DataMember (Name = "age")>] Возраст : Int32;
             [<field: DataMember (Name = "url")>] Url : String;
             [<field: DataMember (Name = "created-by")>] CreatedBy : String
         }
         with
 
-            static member BasedOn baseUrl (person : Repository.Person) = 
+            static member BasedOn baseUrl (person : Repository.Человек) = 
                 {
                     Id = person.Id;
                     FullName = person.FullName;
-                    Age = person.Age;
+                    Возраст = person.Возраст;
                     Url = (getUrl baseUrl (sprintf "/people/%d" person.Id));
                     CreatedBy = person.CreatedBy;
                 }
 
         [<DataContract (Name = "person-catalog", Namespace = "")>]
-        type PersonCatalog = {
+        type КаталогЛюдей = {
             [<field: DataMember (Name = "self")>] Self : String;
-            [<field: DataMember (Name = "people")>] People : PersonSummary seq;
+            [<field: DataMember (Name = "people")>] Люди : PersonSummary seq;
         }
 
         [<DataContract (Name = "person", Namespace = "")>]
         type PersonMessage = {
             [<field: DataMember (Name = "full-name", Order = 0)>] FullName : String;
-            [<field: DataMember (Name = "age", Order = 1, IsRequired = false)>] Age : Int32;
+            [<field: DataMember (Name = "age", Order = 1, IsRequired = false)>] Возраст : Int32;
         }
 
         [<DataContract (Name = "person-created", Namespace = "")>]
@@ -53,65 +53,65 @@ module People =
             [<field: DataMember (Name = "url")>] Url : String;
         }
 
-    let getPeople (repository : Repository.IRepository) =
+    let getPeople (репозиторий : Repository.IRepository) =
         fun (search : String option) (meta : МетаданныеОперации) ->
 
             let people = 
-                repository.All ()
+                репозиторий.All ()
                 |> Seq.map (PersonSummary.BasedOn meta.ContainerUrl)
 
             {
                 Self = (getUrl meta.ContainerUrl "people");
-                People = people;
+                Люди = people;
             }
 
-    let getPerson (repository : Repository.IRepository) = 
-        fun (id : Int32) (meta : МетаданныеОперации) ->
+    let getPerson (репозиторий : Repository.IRepository) = 
+        fun (id : Int32) (мета : МетаданныеОперации) ->
             try 
-                match (repository.Find id) with
-                | Some person -> РезультатОперации.ТолькоРесурс (PersonSummary.BasedOn meta.ContainerUrl person)
+                match (репозиторий.Find id) with
+                | Some person -> РезультатОперации.ТолькоРесурс (PersonSummary.BasedOn мета.ContainerUrl person)
                 | _ -> РезультатОперации.ТолькоСтатус 404        
             with
             | :? FormatException -> РезультатОперации.ТолькоСтатус 400
 
-    let addPerson (repository : Repository.IRepository) = 
-        fun (message : PersonMessage) (meta : МетаданныеОперации) ->
+    let addPerson (репозиторий : Repository.IRepository) = 
+        fun (сообщение : PersonMessage) (мета : МетаданныеОперации) ->
         
-            let userName = 
-                match meta.Пользователь with
-                | Some user -> user.Id
+            let имяПользователя = 
+                match мета.Пользователь with
+                | Some пользователь -> пользователь.Id
                 | _ -> String.Empty
 
             let person = 
                 {
-                    Repository.Person.Empty
+                    Repository.Человек.Empty
                     with
-                        FullName = message.FullName;
-                        Age = message.Age;
-                        CreatedBy = userName;
+                        FullName = сообщение.FullName;
+                        Возраст = сообщение.Возраст;
+                        CreatedBy = имяПользователя;
                 }
-                |> repository.Save
+                |> репозиторий.Save
 
-            let url =  getUrl meta.ContainerUrl (sprintf "/people/%d" person.Id)
+            let url =  getUrl мета.ContainerUrl (sprintf "/people/%d" person.Id)
 
             РезультатОперации.ТолькоРесурс { Id = person.Id; Url = url; }
 
-    let deletePerson (repository : Repository.IRepository) =
+    let deletePerson (репозиторий : Repository.IRepository) =
         fun id ->
-            repository.Delete id
+            репозиторий.Delete id
 
-    let updatePerson (repository : Repository.IRepository) = 
+    let updatePerson (репозиторий : Repository.IRepository) = 
         fun id (update : PersonMessage) ->
-            match (repository.Find id) with
+            match (репозиторий.Find id) with
             | Some person ->
 
                 {
                     person
                     with
                         FullName = update.FullName;
-                        Age = update.Age
+                        Возраст = update.Возраст
                 }
-                |> repository.Save
+                |> репозиторий.Save
                 |> ignore
 
                 РезультатОперации.ТолькоСтатус 200

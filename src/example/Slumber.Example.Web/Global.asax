@@ -1,1 +1,1 @@
-﻿<%@ Application Inherits="Дрема.Пример.App" %>
+﻿<%@ Application Inherits="Дрема.Пример.Приложение" %>

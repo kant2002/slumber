@@ -5,10 +5,10 @@ open System.IO
 
 module Repository = 
 
-    type Person = {
+    type Человек = {
         Id : Int32;
         FullName : String;
-        Age : Int32;
+        Возраст : Int32;
         CreatedBy : String;
     }
     with
@@ -17,14 +17,14 @@ module Repository =
             {
                 Id = 0;
                 FullName = String.Empty;
-                Age = 0;
+                Возраст = 0;
                 CreatedBy = String.Empty;
             }
 
     type IRepository =
-        abstract member All : unit -> Person seq
-        abstract member Find : Int32 -> Person option
-        abstract member Save : Person -> Person
+        abstract member All : unit -> Человек seq
+        abstract member Find : Int32 -> Человек option
+        abstract member Save : Человек -> Человек
         abstract member Delete : Int32 -> unit
         abstract member Setup : unit -> unit
 
@@ -35,7 +35,7 @@ module Repository =
 
         type Repository () = 
 
-            let data = ConcurrentDictionary<Int32, Person> ()
+            let data = ConcurrentDictionary<Int32, Человек> ()
             let current = ref 0
 
             let find id = 
@@ -44,7 +44,7 @@ module Repository =
                 | _ -> None
 
             let all () = 
-                data.Values :> seq<Person>
+                data.Values :> seq<Человек>
 
             let save person = 
                 if (person.Id <> 0) then
@@ -152,7 +152,7 @@ module Repository =
                 {
                     Id = reader.GetInt32 0;
                     FullName = reader.GetString 1;
-                    Age = reader.GetInt32 2;
+                    Возраст = reader.GetInt32 2;
                     CreatedBy = reader.GetString 3;
                 }  
                 
@@ -194,7 +194,7 @@ module Repository =
                     [
                         ("id", box person.Id);
                         ("name", box person.FullName);
-                        ("age", box person.Age);
+                        ("age", box person.Возраст);
                         ("createdBy", box person.CreatedBy);
                     ]
 

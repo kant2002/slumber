@@ -840,7 +840,7 @@ module ``Setup facts`` =
         module ``named function`` = 
 
             let [<Fact>] ``Sets correct endpoint name`` () = 
-                Endpoint.Empty |> named "Test" |> getName |> should equal "Test"
+                ОконечнаяТочка.Empty |> named "Test" |> getName |> should equal "Test"
 
         [<Trait (Traits.Names.Module, ModuleName)>]
         module ``supporting function`` = 
@@ -855,7 +855,7 @@ module ``Setup facts`` =
                     }
 
                 let binding' = 
-                    Endpoint.Empty 
+                    ОконечнаяТочка.Empty 
                     |> supporting binding
                     |> getBindings
                     |> List.head
@@ -872,7 +872,7 @@ module ``Setup facts`` =
                     }
 
                 (fun () ->
-                    Endpoint.Empty
+                    ОконечнаяТочка.Empty
                     |> supporting binding
                     |> supporting binding
                     |> ignore
@@ -954,7 +954,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Endpoint is added to container`` () =
                 
                 let endpoint = 
-                    { Endpoint.Empty with Шаблон = "/"; }
+                    { ОконечнаяТочка.Empty with Шаблон = "/"; }
 
                 let endpoint' = 
                     Контейнер.Пустой
@@ -967,10 +967,10 @@ module ``Setup facts`` =
             let [<Fact>] ``Endpoints with equivalent templates raises SetupException`` () =
                 
                 let endpoint1 = 
-                    { Endpoint.Empty with Шаблон = "/{id}"; }
+                    { ОконечнаяТочка.Empty with Шаблон = "/{id}"; }
 
                 let endpoint2 = 
-                    { Endpoint.Empty with Шаблон = "/{no}"; }
+                    { ОконечнаяТочка.Empty with Шаблон = "/{no}"; }
 
                 (fun () ->
                     Контейнер.Пустой
@@ -985,7 +985,7 @@ module ``Setup facts`` =
             let [<Fact>] ``Binding is added to all existing endpoints`` () =
 
                 let hasCorrectBindings container = 
-                    container.Endpoints
+                    container.ОконечныеТочки
                     |> List.exists (fun endpoint ->
                             endpoint.Привязки
                             |> List.map (fun binding -> binding.Verb)
@@ -998,10 +998,10 @@ module ``Setup facts`` =
                     {
                         Контейнер.Пустой
                         with
-                            Endpoints = 
+                            ОконечныеТочки = 
                                 [
-                                    Endpoint.Empty;
-                                    Endpoint.Empty;
+                                    ОконечнаяТочка.Empty;
+                                    ОконечнаяТочка.Empty;
                                 ]
                     }
 
@@ -1016,10 +1016,10 @@ module ``Setup facts`` =
                     {
                         Контейнер.Пустой
                         with
-                            Endpoints = 
+                            ОконечныеТочки = 
                                 [
                                     {
-                                        Endpoint.Empty
+                                        ОконечнаяТочка.Empty
                                         with
                                             Привязки = 
                                                 [
@@ -1049,8 +1049,8 @@ module ``Setup facts`` =
 
             let [<Fact>] ``Writer is added to content types`` () =
                 Контейнер.Пустой
-                |> writing МедиаТипы.Text.Xml write
-                |> getWriter МедиаТипы.Text.Xml
+                |> запись МедиаТипы.Text.Xml write
+                |> получитьПисателя МедиаТипы.Text.Xml
                 |> Option.isSome
                 |> should be True
 
@@ -1058,8 +1058,8 @@ module ``Setup facts`` =
                 (fun () ->
 
                     Контейнер.Пустой
-                    |> writing МедиаТипы.Text.Xml write
-                    |> writing МедиаТипы.Text.Xml write
+                    |> запись МедиаТипы.Text.Xml write
+                    |> запись МедиаТипы.Text.Xml write
                     |> ignore
 
                 ) |> should throw typeof<SetupException>
@@ -1072,8 +1072,8 @@ module ``Setup facts`` =
 
             let [<Fact>] ``Reader is added to content types`` () =
                 Контейнер.Пустой
-                |> reading МедиаТипы.Text.Xml read
-                |> getReader МедиаТипы.Text.Xml
+                |> чтение МедиаТипы.Text.Xml read
+                |> получитьЧитателя МедиаТипы.Text.Xml
                 |> Option.isSome
                 |> should be True
 
@@ -1081,8 +1081,8 @@ module ``Setup facts`` =
                 (fun () ->
 
                     Контейнер.Пустой
-                    |> reading МедиаТипы.Text.Xml read
-                    |> reading МедиаТипы.Text.Xml read
+                    |> чтение МедиаТипы.Text.Xml read
+                    |> чтение МедиаТипы.Text.Xml read
                     |> ignore
 
                 ) |> should throw typeof<SetupException>
@@ -1092,7 +1092,7 @@ module ``Setup facts`` =
 
             let [<Fact>] ``Forwarded types are added to contianer`` () =
                 Контейнер.Пустой
-                |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> перенаправление МедиаТипы.Text.Html МедиаТипы.Text.Xml
                 |> applyForwarding МедиаТипы.Text.Html
                 |> should equal МедиаТипы.Text.Xml
 
@@ -1100,8 +1100,8 @@ module ``Setup facts`` =
                 (fun () ->
 
                     Контейнер.Пустой
-                    |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
-                    |> forwarding МедиаТипы.Text.Html МедиаТипы.Application.Json
+                    |> перенаправление МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                    |> перенаправление МедиаТипы.Text.Html МедиаТипы.Application.Json
                     |> ignore
 
                 ) |> should throw typeof<SetupException>

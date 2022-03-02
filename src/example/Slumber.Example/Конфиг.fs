@@ -6,35 +6,35 @@ open Дрема.Framework
 open Дрема.Setup
 open Дрема.IO.DataContract
 
-module Config = 
+module Конфиг = 
 
-    type Description () = 
+    type Описание () = 
 
-        let authenticate (request : Запрос) = 
+        let авторизовать (запрос : Запрос) = 
 
             let username = 
-                request.Payload.Заголовки
+                запрос.Payload.Заголовки
                 |> Заголовки.получитьЗначение "Authorization"
 
             match username with
             | Some username' -> Разрешено (Some { Id = username'; Свойства = []; })
             | _ -> Запрещено
 
-        let createRepository () =
+        let создатьРепозиторий () =
 
             //NOTE You can uncomment the SQL CE line below to use a very simple, very
             //fragile SQL CE repository.
 
             //let repository = Repository.SqlCe.Repository.Create "Default"
-            let repository = Repository.InMemory.Repository.Create ()
+            let репозиторий = Repository.InMemory.Repository.Create ()
 
-            repository.Setup ()
+            репозиторий.Setup ()
 
-            repository
+            репозиторий
 
-        interface IContainerDescription with
+        interface ИОписаниеКонтейнера with
 
-            member this.Describe baseUrl =
+            member this.Описать базовыйУрл =
 
                 (**
                     NOTE The config below uses two approaches to dependencies. One is to partially apply functions, the other
@@ -47,39 +47,39 @@ module Config =
                     a new function f' = get' f then the parameters x and y will no longer be called x and y.
                 **)
 
-                let repository = createRepository ()
+                let репозиторий = создатьРепозиторий ()
 
                 let resolve type' =                     
                     if (type' = typeof<Repository.IRepository>) then
-                        Some (box repository)
+                        Some (box репозиторий)
                     else
                         None
 
 
-                containerAt (relativeUri baseUrl "/")
-                |> authenticatedBy authenticate true
+                containerAt (relativeUri базовыйУрл "/")
+                |> authenticatedBy авторизовать true
                 |> resolveUsing resolve
                 |> with' (
                         endpointAt "/"
                         |> named "service-catalog"
-                        |> supporting (public' get Startup.getCatalog)
+                        |> supporting (public' get Startup.получитьКаталог)
                     )            
                 |> with' (
                         endpointAt "/people"
                         |> named "people"
                         |> supporting (public' get People.getPeople) //NOTE This uses the resolver function to get the IRepository parameter
-                        |> supporting (post (People.addPerson repository))
+                        |> supporting (post (People.addPerson репозиторий))
                     )
                 |> with' (
                         endpointAt "/people/{id}"
                         |> named "person"
-                        |> supporting (public' get (People.getPerson repository))
-                        |> supporting (delete (People.deletePerson repository))
-                        |> supporting (put (People.updatePerson repository))
+                        |> supporting (public' get (People.getPerson репозиторий))
+                        |> supporting (delete (People.deletePerson репозиторий))
+                        |> supporting (put (People.updatePerson репозиторий))
                     )
                 |> all (public' options Общее.options)
-                |> reading МедиаТипы.Application.Json Json.read
-                |> writing МедиаТипы.Application.Json Json.write
-                |> reading МедиаТипы.Text.Xml Xml.read
-                |> writing МедиаТипы.Text.Xml Xml.write
-                |> forwarding МедиаТипы.Text.Html МедиаТипы.Text.Xml
+                |> чтение МедиаТипы.Application.Json Json.read
+                |> запись МедиаТипы.Application.Json Json.write
+                |> чтение МедиаТипы.Text.Xml Xml.read
+                |> запись МедиаТипы.Text.Xml Xml.write
+                |> перенаправление МедиаТипы.Text.Html МедиаТипы.Text.Xml

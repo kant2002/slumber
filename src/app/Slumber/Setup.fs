@@ -384,7 +384,7 @@ module Setup =
         ///Creates an endpoint for the given URI template
         let endpointAt template = 
             {
-                Endpoint.Empty
+                ОконечнаяТочка.Empty
                 with
                     Название = string (Guid.NewGuid ());
                     Шаблон = template;
@@ -429,14 +429,14 @@ module Setup =
             {
                 Контейнер.Пустой
                 with
-                    BaseUrl = uri;
+                    БазовыйУрл = uri;
             }
 
         ///Sets the authentication function to be used by the container
-        let authenticatedBy f privateByDefault container = 
+        let authenticatedBy f privateByDefault контейнер = 
 
-            let setAuthenticate security = 
-                { security with Авторизовать = (Some f); }
+            let setAuthenticate безопасность = 
+                { безопасность with Авторизовать = (Some f); }
 
             let setPrivacy security = 
 
@@ -449,111 +449,111 @@ module Setup =
                 { security with DefaultMode = mode; }
 
             let security = 
-                container.Security 
+                контейнер.Security 
                 |> setAuthenticate 
                 |> setPrivacy
 
-            { container with Security = security; }
+            { контейнер with Security = security; }
 
         ///Adds an endpoint to a container
-        let with' endpoint container = 
+        let with' оконечнаяТочка контейнер = 
 
-            let template = 
-                UriTemplate (endpoint.Шаблон)
+            let шаблон = 
+                UriTemplate (оконечнаяТочка.Шаблон)
 
-            let existing = 
-                container.Endpoints
-                |> List.tryFind (fun endpoint' ->
+            let существующий = 
+                контейнер.ОконечныеТочки
+                |> List.tryFind (fun оконечнаяТочка' ->
                     
-                        let template' = 
-                            UriTemplate (endpoint'.Шаблон)
+                        let шаблон' = 
+                            UriTemplate (оконечнаяТочка'.Шаблон)
                             
-                        template'.IsEquivalentTo (template)
+                        шаблон'.IsEquivalentTo (шаблон)
                     )
 
-            match existing with
-            | Some endpoint' -> 
-                invalidSetup (String.Format ("The template {0} is equivalent to the template {1} which already exists.", endpoint.Шаблон, endpoint'.Шаблон))
+            match существующий with
+            | Some оконечнаяТочка' -> 
+                invalidSetup (String.Format ("The template {0} is equivalent to the template {1} which already exists.", оконечнаяТочка.Шаблон, оконечнаяТочка'.Шаблон))
             | _ ->
                 {
-                    container
+                    контейнер
                     with
-                        Endpoints = (endpoint :: container.Endpoints);
+                        ОконечныеТочки = (оконечнаяТочка :: контейнер.ОконечныеТочки);
                 }
 
         ///Sets the dependency resolver for a container
-        let resolveUsing f (container : Контейнер) = 
-            { container with Resolver = (Some f); }
+        let resolveUsing f (контейнер : Контейнер) = 
+            { контейнер with Resolver = (Some f); }
 
         ///Adds a reader to a container
-        let reading (contentType : String) reader container = 
-            match (getReader contentType container) with
-            | Some _ -> invalidSetup (String.Format ("A reader for {0} has already been configured for this container.", contentType))
+        let чтение (типСодержимого : String) читатель контейнер = 
+            match (получитьЧитателя типСодержимого контейнер) with
+            | Some _ -> invalidSetup (String.Format ("A reader for {0} has already been configured for this container.", типСодержимого))
             | _ ->
-                let io = 
+                let вв = 
                     {
-                        container.ВВ
+                        контейнер.ВВ
                         with
-                            Читатели = ((contentType, reader) :: container.ВВ.Читатели);
+                            Читатели = ((типСодержимого, читатель) :: контейнер.ВВ.Читатели);
                     }
 
-                { container with ВВ = io; }
+                { контейнер with ВВ = вв; }
 
         ///Adds a writer to a container
-        let writing (contentType : String) writer container = 
-            match (getWriter contentType container) with
-            | Some _ -> invalidSetup (String.Format ("A writer for {0} has already been configured for this container.", contentType))
+        let запись (типСодержимого : String) писатель контейнер = 
+            match (получитьПисателя типСодержимого контейнер) with
+            | Some _ -> invalidSetup (String.Format ("A writer for {0} has already been configured for this container.", типСодержимого))
             | _ ->
-                let io = 
+                let вв = 
                     {
-                        container.ВВ
+                        контейнер.ВВ
                         with
-                            Писатели = ((contentType, writer) :: container.ВВ.Писатели);
+                            Писатели = ((типСодержимого, писатель) :: контейнер.ВВ.Писатели);
                     }
 
-                { container with ВВ = io; }
+                { контейнер with ВВ = вв; }
 
         ///Sets up content type forwarding
-        let forwarding (fromContentType : String) (toContentType : String) container = 
-            if (isForwarded fromContentType container) then
+        let перенаправление (fromContentType : String) (toContentType : String) контейнер = 
+            if (isForwarded fromContentType контейнер) then
                 invalidSetup (String.Format ("The content type {0} is already being forwarded.", fromContentType))
             else
                 {
-                    container
+                    контейнер
                     with 
                         ВВ = 
                             {
-                                container.ВВ
+                                контейнер.ВВ
                                 with
-                                    ПеренаправляемыеТипы = (fromContentType, toContentType) :: container.ВВ.ПеренаправляемыеТипы;
+                                    ПеренаправляемыеТипы = (fromContentType, toContentType) :: контейнер.ВВ.ПеренаправляемыеТипы;
                             }
                 }    
 
         ///Applies a binding to all endpoints
-        let all (binding : Привязка) (container : Контейнер) = 
+        let all (привязка : Привязка) (контейнер : Контейнер) = 
 
             let verbAlreadyUsed = 
-                container.Endpoints
-                |> List.tryPick (Endpoints.tryGetBinding binding.Verb)
+                контейнер.ОконечныеТочки
+                |> List.tryPick (Endpoints.tryGetBinding привязка.Verb)
                 |> Option.isSome
 
             if verbAlreadyUsed then
                 raise (NotSupportedException ("One or more endpoints already has a binding for the specified HTTP verb."))
 
             let endpoints' = 
-                container.Endpoints
+                контейнер.ОконечныеТочки
                 |> List.map (fun endpoint ->
                         {
                             endpoint
                             with
-                                Привязки = binding :: endpoint.Привязки;
+                                Привязки = привязка :: endpoint.Привязки;
                         }
                     )
 
             {
-                container
+                контейнер
                 with
-                    Endpoints = endpoints';
+                    ОконечныеТочки = endpoints';
             }
 
     

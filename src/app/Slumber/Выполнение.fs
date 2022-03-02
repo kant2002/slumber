@@ -109,7 +109,7 @@ module Execution =
                 {
                     Метаданные = 
                         {
-                            ContainerUrl = args.Container.BaseUrl;
+                            ContainerUrl = args.Container.БазовыйУрл;
                             EndpointName = args.Target.EndpointName;
                             Запрос = args.Request;
                             Параметры = args.Target.Parameters;
@@ -224,7 +224,7 @@ module Execution =
         }
 
     ///Runs the execution phase
-    let run<'TState> : ExecutionArgs -> State<'TState> = 
+    let run<'TState> : ExecutionArgs -> Состояние<'TState> = 
         asyncRun
         >> Async.RunSynchronously
 

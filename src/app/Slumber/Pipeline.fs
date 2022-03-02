@@ -5,7 +5,7 @@ open System.Web
 open Дрема.Framework
 
 ///Contains functions for running the default Slumber pipeline
-module Pipeline = 
+module Конвейер = 
 
     ///Runs the standard Slumber pipeline asynchronously
     let asyncRun mode (input : Запрос) (output : IOutput) = 
@@ -22,6 +22,6 @@ module Pipeline =
         execute input
 
     ///Runs the standard Slumber pipeline synchronously
-    let run mode input output = 
-        asyncRun mode input output
+    let run режим input output = 
+        asyncRun режим input output
         |> Async.RunSynchronously

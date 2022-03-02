@@ -480,7 +480,7 @@ module ``Execution facts`` =
             
             let isStopped result = 
                 match result with
-                | Stopped (Completed _) -> true
+                | Остановлен (Завершено _) -> true
                 | _ -> false
 
             getArgs' () 
@@ -492,7 +492,7 @@ module ``Execution facts`` =
             
             let isCorrectResponse result = 
                 match result with
-                | Stopped (Completed resp) ->
+                | Остановлен (Завершено resp) ->
                     match resp.ТипОтвета with
                     | Ресурс (200, []) -> true
                     | _ -> false
@@ -507,7 +507,7 @@ module ``Execution facts`` =
             
             let areHeadersCorrect result = 
                 match result with
-                | Stopped (Completed resp) -> resp.CustomHeaders = [ ("key", "value"); ]
+                | Остановлен (Завершено resp) -> resp.CustomHeaders = [ ("key", "value"); ]
                 | _ -> false
 
             getArgs' ()
@@ -519,7 +519,7 @@ module ``Execution facts`` =
             
             let isContentTypeCorrect result = 
                 match result with
-                | Stopped (Completed resp) ->
+                | Остановлен (Завершено resp) ->
                     match resp.ТипСодержимого with
                     | Some contentType -> contentType = МедиаТипы.Text.Xml
                     | _ -> false
@@ -534,7 +534,7 @@ module ``Execution facts`` =
             
             let isContentTypeCorrect result = 
                 match result with
-                | Stopped (Completed resp) -> Option.isNone resp.ТипСодержимого
+                | Остановлен (Завершено resp) -> Option.isNone resp.ТипСодержимого
                 | _ -> false
 
             getArgs' ()

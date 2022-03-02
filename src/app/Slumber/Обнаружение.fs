@@ -56,11 +56,11 @@ module Discovery =
                 )
 
         ///Attempts to match a request URI to the given endpoint and returns the matching URI variables
-        let private getTemplateVariables args (endpoint : Endpoint) = 
+        let private getTemplateVariables args (endpoint : ОконечнаяТочка) = 
         
             let url = normaliseUrl args.Запрос.Url.Raw
             let template = UriTemplate (endpoint.Шаблон, true)            
-            let results = template.Match (args.Контейнер.BaseUrl, url)
+            let results = template.Match (args.Контейнер.БазовыйУрл, url)
 
             if results = null then
                 None
@@ -77,7 +77,7 @@ module Discovery =
                     журналИнфо "[%A] Resolving endpoint for %A" args.Запрос.Id args.Запрос.Url.Путь
 
                     return
-                        args.Контейнер.Endpoints
+                        args.Контейнер.ОконечныеТочки
                         |> List.tryPick (fun endpoint ->
                                 match (getTemplateVariables args endpoint) with
                                 | Some parameters -> Some (endpoint, parameters)
@@ -198,7 +198,7 @@ module Discovery =
 
                 let reader = 
                     args.Контейнер
-                    |> getReader targetContentType
+                    |> получитьЧитателя targetContentType
 
                 if (Option.isSome reader) then
                     журналИнфо "[%A] Selected request content type of %A" args.Запрос.Id targetContentType
@@ -233,7 +233,7 @@ module Discovery =
                             if (targetContentType <> contentType) then
                                 журналИнфо "[%A] Response content type forwarding from %A to %A" args.Запрос.Id contentType targetContentType
 
-                            match (getWriter targetContentType args.Контейнер) with
+                            match (получитьПисателя targetContentType args.Контейнер) with
                             | Some writer -> Some (targetContentType, writer)
                             | _ -> None
                         )

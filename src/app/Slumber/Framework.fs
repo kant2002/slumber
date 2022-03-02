@@ -47,7 +47,7 @@ module Framework =
                 }
 
         ///Represents a URL bound endpoint exposing zero or more operations
-        type Endpoint = {
+        type ОконечнаяТочка = {
             Название : String;
             Шаблон : String;
             Привязки : Привязка list;
@@ -99,9 +99,9 @@ module Framework =
 
         ///Represents a collection of endpoints and associated configuration data
         type Контейнер = {
-            Endpoints : Endpoint list;
+            ОконечныеТочки : ОконечнаяТочка list;
             ВВ : КонфигВВ;
-            BaseUrl : Uri;
+            БазовыйУрл : Uri;
             Security : КонфигБезопасности;
             Resolver : Resolver option;
         }
@@ -110,33 +110,33 @@ module Framework =
             ///The empty container
             static member Пустой = 
                 {
-                    Endpoints = [];
+                    ОконечныеТочки = [];
                     ВВ = КонфигВВ.Пустой;
-                    BaseUrl = Uri (DefaultUrl, UriKind.Absolute);
+                    БазовыйУрл = Uri (DefaultUrl, UriKind.Absolute);
                     Security = КонфигБезопасности.Default;
                     Resolver = None;
                 }
 
         ///Union describing possible configuration modes
-        type ConfigurationMode = 
+        type РежимКонфигурации = 
             | Implicit
             | Explicit of Контейнер
             | Mixed of (Контейнер -> Контейнер)
 
         ///Defines a class which can describe a container for a given base URL
-        type IContainerDescription = 
-            abstract member Describe : Uri -> Контейнер
+        type ИОписаниеКонтейнера = 
+            abstract member Описать : Uri -> Контейнер
 
         ///Contains functions for working with containers
         module Containers = 
 
             ///Gets a container's endpoint collection
             let getEndpoints container =
-                container.Endpoints
+                container.ОконечныеТочки
 
             ///Gets a container's base URL
             let getBaseUrl container = 
-                container.BaseUrl
+                container.БазовыйУрл
 
             ///Gets the container's IO configuration
             let getIO container = 
@@ -155,7 +155,7 @@ module Framework =
                     )
 
             ///Gets the reader for the given content type
-            let getReader contentType container = 
+            let получитьЧитателя contentType container = 
                 container.ВВ.Читатели
                 |> getMessageIO contentType
 
@@ -164,7 +164,7 @@ module Framework =
                 container.ВВ.Писатели
 
             ///Gets the writer for the given content type
-            let getWriter contentType container = 
+            let получитьПисателя contentType container = 
                 container.ВВ.Писатели
                 |> getMessageIO contentType
 
@@ -195,7 +195,7 @@ module Framework =
 
             ///Gets an endpoint from a container by name
             let tryGetEndpointByName name container = 
-                container.Endpoints
+                container.ОконечныеТочки
                 |> List.tryPick (fun endpoint ->
                         if (String.same endpoint.Название name) then
                             Some endpoint
@@ -227,17 +227,17 @@ module Framework =
 
     ///Contains functions and types for running request pipelines
     [<AutoOpen>]
-    module Pipeline = 
+    module Конвейер = 
 
         ///Describes reasons for the pipeline to stop
-        type StopType = 
-            | Exception of Exception
-            | Completed of Ответ
+        type ТипОстановки = 
+            | Исключение of Exception
+            | Завершено of Ответ
 
         ///Describes possible pipeline states
-        type State<'TState> = 
-            | Running of 'TState
-            | Stopped of StopType   
+        type Состояние<'ТСостояние> = 
+            | Запущен of 'ТСостояние
+            | Остановлен of ТипОстановки   
 
         ///Gets the state resulting from the execution of a function
         let private getNextState f arg = 
@@ -246,7 +246,7 @@ module Framework =
                     return! (f arg)
                 with
                 | e -> 
-                    return (Stopped (Exception e))
+                    return (Остановлен (Исключение e))
             }
 
         ///Binds two pipeline phases together
@@ -258,8 +258,8 @@ module Framework =
                         getNextState f arg
 
                     match (state) with
-                    | Running arg' -> return! (g arg')
-                    | Stopped type' -> return (Stopped type')
+                    | Запущен arg' -> return! (g arg')
+                    | Остановлен type' -> return (Остановлен type')
                 }
 
         ///Binds the final pipeline phase to the rest of the pipeline
@@ -276,7 +276,7 @@ module Framework =
         ///Lifts an argument to the running state
         let start arg =
             async {
-                return (Running arg)
+                return (Запущен arg)
             }
 
     ///Contains pipeline utility functions
@@ -285,8 +285,8 @@ module Framework =
         ///Stops execution of the pipeline with the given response
         let stopWithResponse response = 
             response
-            |> Completed
-            |> Stopped
+            |> Завершено
+            |> Остановлен
 
         ///Stops execution of the pipline with the given status code
         let stopWithStatus statusCode = 
@@ -295,21 +295,21 @@ module Framework =
                 ТипСодержимого = None;
                 CustomHeaders = [];
             }
-            |> Completed
-            |> Stopped
+            |> Завершено
+            |> Остановлен
 
         ///Stops the execution of the pipeline with an error
-        let stopWithError e = 
-            Exception e
-            |> Stopped
+        let остановитьСОшибкой e = 
+            Исключение e
+            |> Остановлен
 
         ///Continues execution of the pipeline with the given arguments
         let continue' arg = 
-            Running arg
+            Запущен arg
 
     ///Contains functions for loading implicit configuration
     [<RequireQualifiedAccess>]
-    module ImplicitConfiguration = 
+    module НеявнаяКонфигурация = 
 
         open System.IO
         open System.Reflection
@@ -318,46 +318,46 @@ module Framework =
         open HandyFS.Types
 
         ///Instantiates and queries the first container description that can be found in the /bin/ folder 
-        let private find baseUrl = 
+        let private найти базовыйУрл = 
 
             ///TODO Tidy up / abstract this function
 
             BuildManager.GetReferencedAssemblies () 
             |> ignore
 
-            let tryGetTypes (assembly : Assembly) = 
+            let попробоватьПолучитьТипы (сборка : Assembly) = 
                 try
-                    assembly.GetTypes ()
+                    сборка.GetTypes ()
                 with
                 | :? ReflectionTypeLoadException -> Array.empty
 
-            let tryCreateDescription (type' : Type) = 
+            let попробоватьСоздатьОписание (тип' : Type) = 
                 try
-                    Some ((Activator.CreateInstance type') :?> IContainerDescription)
+                    Some ((Activator.CreateInstance тип') :?> ИОписаниеКонтейнера)
                 with
                 | _ -> None
 
-            let types = 
+            let типы = 
                 AppDomain.CurrentDomain.GetAssemblies ()
-                |> Array.Parallel.collect tryGetTypes
-                |> Array.filter (implements typeof<IContainerDescription>)
+                |> Array.Parallel.collect попробоватьПолучитьТипы
+                |> Array.filter (implements typeof<ИОписаниеКонтейнера>)
 
-            if (Array.isEmpty types) then
+            if (Array.isEmpty типы) then
                 invalidOp "Implicit configuration requires a type that implements IContainerDescription but none could be found."
 
             else
-                match (Array.tryPick tryCreateDescription types) with
-                | Some description -> description.Describe baseUrl
+                match (Array.tryPick попробоватьСоздатьОписание типы) with
+                | Some описание -> описание.Описать базовыйУрл
                 | _ -> invalidOp "No type implementing IContainerDescription could be instantiated." //TODO More appropriate exception type?
     
         ///Instantiates and queries the first container description that can be found in the /bin/ folder and caches the result
-        let get = 
+        let получить = 
 
-            let configs = ConcurrentDictionary<Uri, Контейнер> ()
+            let конфиги = ConcurrentDictionary<Uri, Контейнер> ()
 
-            fun (baseUrl : Uri) -> 
-                configs.GetOrAdd (
-                    baseUrl, 
-                    find
+            fun (базовыйУрл : Uri) -> 
+                конфиги.GetOrAdd (
+                    базовыйУрл, 
+                    найти
                 )
 

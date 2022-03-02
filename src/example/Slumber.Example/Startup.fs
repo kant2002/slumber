@@ -11,43 +11,43 @@ module Startup =
     open Дрема.Общее.Http
 
     [<AutoOpen>]
-    module Model = 
+    module Модель = 
 
         [<DataContract (Name = "service", Namespace = "")>] 
-        type Service = {
-            [<field: DataMember (Name = "name")>] Name : String;
+        type Сервис = {
+            [<field: DataMember (Name = "name")>] Название : String;
             [<field: DataMember (Name = "url")>] Url : String;
         }
 
         [<DataContract (Name = "service-catalog", Namespace = "")>]
-        type ServiceCatalog = {
+        type КаталогСервисов = {
             [<field: DataMember (Name = "self")>] Self : String;
-            [<field: DataMember (Name = "services")>] Services : Service seq;
+            [<field: DataMember (Name = "services")>] Сервисы : Сервис seq;
         }
     
-    let getCatalog (meta : МетаданныеОперации) = 
+    let получитьКаталог (мета : МетаданныеОперации) = 
 
-        let baseUrl = meta.ContainerUrl
-        let container = ImplicitConfiguration.get baseUrl
+        let базовыйУрл = мета.ContainerUrl
+        let контейнер = НеявнаяКонфигурация.получить базовыйУрл
 
-        let services = 
-            container.Endpoints
-            |> List.filter (fun endpoint -> not (Regex.IsMatch (endpoint.Шаблон, "{.+?}"))) //Display only top level, non-parameterised endpoints
-            |> List.map (fun endpoint ->
+        let сервисы = 
+            контейнер.ОконечныеТочки
+            |> List.filter (fun оконечнаяТочка -> not (Regex.IsMatch (оконечнаяТочка.Шаблон, "{.+?}"))) //Display only top level, non-parameterised endpoints
+            |> List.map (fun оконечнаяТочка ->
 
-                    let url = 
-                        match endpoint.Шаблон with
-                        | "/" -> string baseUrl
-                        | _ -> string (создатьАбсолютныйУри baseUrl endpoint.Шаблон)
+                    let урл = 
+                        match оконечнаяТочка.Шаблон with
+                        | "/" -> string базовыйУрл
+                        | _ -> string (создатьАбсолютныйУри базовыйУрл оконечнаяТочка.Шаблон)
 
                     {
-                        Name = endpoint.Название;
-                        Url = url;
+                        Название = оконечнаяТочка.Название;
+                        Url = урл;
                     }
                 )
 
         {
-            Self = baseUrl.AbsoluteUri;
-            Services = services;
+            Self = базовыйУрл.AbsoluteUri;
+            Сервисы = сервисы;
         }
 
